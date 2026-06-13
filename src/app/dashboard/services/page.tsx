@@ -14,22 +14,21 @@ export default function ServicesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    async function fetchServices() {
+      try {
+        setIsLoading(true);
+        const data = await getServices();
+        setServices(data || []);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || "Failed to load services");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchServices();
   }, []);
-
-  const fetchServices = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getServices();
-      setServices(data || []);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || "Failed to load services");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleAdd = () => {
     setEditingService(null);

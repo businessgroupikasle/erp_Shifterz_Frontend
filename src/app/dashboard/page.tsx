@@ -10,21 +10,20 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    async function fetchData() {
+      try {
+        setIsLoading(true);
+        const res = await getDashboardData();
+        setData(res);
+      } catch (err: any) {
+        setError(err.message || "Failed to load dashboard data");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchData();
   }, []);
-
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const res = await getDashboardData();
-      setData(res);
-    } catch (err: any) {
-      setError(err.message || "Failed to load dashboard data");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Loading dashboard data...</div>;

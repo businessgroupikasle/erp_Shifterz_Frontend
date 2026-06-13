@@ -14,22 +14,21 @@ export default function FranchisePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    async function fetchFranchises() {
+      try {
+        setIsLoading(true);
+        const data = await getFranchises();
+        setFranchises(data || []);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || "Failed to load franchises");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchFranchises();
   }, []);
-
-  const fetchFranchises = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getFranchises();
-      setFranchises(data || []);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || "Failed to load franchises");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleAdd = () => {
     setEditingFranchise(null);

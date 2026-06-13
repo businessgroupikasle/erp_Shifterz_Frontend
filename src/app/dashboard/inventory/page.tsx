@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
@@ -29,22 +29,20 @@ export default function InventoryPage() {
   const [filterCategory, setFilterCategory] = useState("All Categories");
 
   useEffect(() => {
+    async function fetchInventory() {
+      try {
+        setIsLoading(true);
+        const data = await getInventory();
+        setItems(data);
+      } catch (err: any) {
+        setError("Failed to load inventory: " + err.message);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchInventory();
   }, []);
-
-  const fetchInventory = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getInventory();
-      setItems(data);
-      setError("");
-    } catch (err: any) {
-      setError("Failed to load inventory: " + err.message);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const lowStockItems = items.filter((item) => item.stock <= item.reorder);
   const totalSkus = items.length;

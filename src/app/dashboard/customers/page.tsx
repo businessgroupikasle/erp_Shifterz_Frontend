@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
@@ -27,22 +27,21 @@ export default function CustomersPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
+    async function fetchCustomers() {
+      try {
+        setIsLoading(true);
+        const data = await getCustomers();
+        setCustomers(data);
+        setError("");
+      } catch (err: any) {
+        setError("Failed to load customers: " + err.message);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchCustomers();
   }, []);
-
-  const fetchCustomers = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getCustomers();
-      setCustomers(data);
-      setError("");
-    } catch (err: any) {
-      setError("Failed to load customers: " + err.message);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleAddCustomer = async (newCustomer: any) => {
     try {

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
@@ -30,22 +30,20 @@ export default function LeadsPage() {
 
   // Load leads from backend
   useEffect(() => {
+    async function fetchLeads() {
+      try {
+        setIsLoading(true);
+        const data = await getLeads();
+        setLeads(data);
+      } catch (err: any) {
+        setError("Failed to load leads: " + err.message);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchLeads();
   }, []);
-
-  const fetchLeads = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getLeads();
-      setLeads(data);
-      setError("");
-    } catch (err: any) {
-      setError("Failed to load leads: " + err.message);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Add new lead
   const handleAddLead = async (newLead: any) => {

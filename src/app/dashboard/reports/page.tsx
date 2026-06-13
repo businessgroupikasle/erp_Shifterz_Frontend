@@ -10,21 +10,20 @@ export default function ReportsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    async function fetchReports() {
+      try {
+        setIsLoading(true);
+        const res = await getReports();
+        setData(res);
+      } catch (err: any) {
+        setError(err.message || "Failed to load reports");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchReports();
   }, []);
-
-  const fetchReports = async () => {
-    try {
-      setIsLoading(true);
-      const res = await getReports();
-      setData(res);
-    } catch (err: any) {
-      setError(err.message || "Failed to load reports");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Loading reports...</div>;

@@ -13,22 +13,21 @@ export default function JobCardsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    async function fetchJobs() {
+      try {
+        setIsLoading(true);
+        const data = await getJobs();
+        setJobs(data || []);
+        setError(null);
+      } catch (err: any) {
+        setError("Failed to load jobs: " + err.message);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchJobs();
   }, []);
-
-  const fetchJobs = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getJobs();
-      setJobs(data || []);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || "Failed to load jobs");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSave = async (data: any) => {
     try {

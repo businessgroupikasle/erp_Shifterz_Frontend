@@ -19,28 +19,31 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchSettings() {
+      try {
+        setIsLoading(true);
+        const data = await getSettings();
+        if (data) {
+          setCompanyInfo(prev => data.companyInfo || prev);
+          setTechnicians(data.technicians || []);
+          setSalesAgents(data.salesAgents || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchSettings();
   }, []);
 
-  const fetchSettings = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getSettings();
-      if (data) {
-        setCompanyInfo(data.companyInfo || companyInfo);
-        setTechnicians(data.technicians || []);
-        setSalesAgents(data.salesAgents || []);
-      }
-    } catch (err) {
-      console.error("Failed to fetch settings:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleCompanyInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setCompanyInfo(prev => ({ ...prev, [name]: value }));
+    if (name === "phone") {
+      setCompanyInfo(prev => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
+    } else {
+      setCompanyInfo(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSaveSettings = async () => {

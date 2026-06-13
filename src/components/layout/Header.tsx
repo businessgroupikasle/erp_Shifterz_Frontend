@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, Settings, User } from "lucide-react";
+import { Bell, Settings, User, LogOut, Clock } from "lucide-react";
 
 const pageHeaders: Record<string, { title: string; description: string }> = {
   "/dashboard": {
@@ -58,8 +59,28 @@ const pageHeaders: Record<string, { title: string; description: string }> = {
   },
 };
 
+function getCurrentTime(): string {
+  const now = new Date();
+  return now.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+}
+
 export default function Header() {
   const pathname = usePathname();
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    setCurrentTime(getCurrentTime());
+    const timer = setInterval(() => {
+      setCurrentTime(getCurrentTime());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const pageInfo = pageHeaders[pathname] || {
     title: "Dashboard",
     description: "Welcome to Shifterz Pro Suite",
@@ -73,12 +94,30 @@ export default function Header() {
           <p className="text-sm text-gray-500 mt-1">{pageInfo.description}</p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
+          {/* Current Time Display */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+            <Clock className="w-4 h-4 text-gray-600" />
+            <span className="text-sm font-semibold text-gray-700">{currentTime}</span>
+          </div>
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <Bell className="w-5 h-5 text-gray-600" />
           </button>
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <Settings className="w-5 h-5 text-gray-600" />
+          </button>
+          <button 
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("user");
+              sessionStorage.clear();
+              document.cookie = "token=; path=/; max-age=0";
+              window.location.href = '/login';
+            }}
+            className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-500" 
+            title="Logout"
+          >
+            <LogOut className="w-5 h-5" />
           </button>
           <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-gray-900 ml-2">
             AD

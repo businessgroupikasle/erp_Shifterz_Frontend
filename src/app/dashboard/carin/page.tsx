@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Eye } from "lucide-react";
 import CarCheckInDialog from "@/components/carin/CarCheckInDialog";
 import PassCarDialog from "@/components/carin/PassCarDialog";
 import CarDetailsDialog from "@/components/carin/CarDetailsDialog";
@@ -25,6 +25,7 @@ interface CarEntry {
 
 import { getCarInRecords, updateCarIn } from "@/lib/api";
 import { useEffect } from "react";
+import { calculateDuration, formatTime } from "@/lib/timeUtils";
 
 export default function CarInOutPage() {
   const router = useRouter();
@@ -37,20 +38,19 @@ export default function CarInOutPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchCars() {
+      try {
+        setIsLoading(true);
+        const data = await getCarInRecords();
+        setCars(data || []);
+      } catch (err) {
+        console.error("Failed to fetch cars:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchCars();
   }, []);
-
-  const fetchCars = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getCarInRecords();
-      setCars(data || []);
-    } catch (err) {
-      console.error("Failed to fetch cars:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handlePassCar = (car: CarEntry) => {
     setSelectedCar(car);
@@ -210,12 +210,12 @@ export default function CarInOutPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{entry.service}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{entry.technician}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{entry.inTime}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-700">{formatTime(entry.inTime)}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    {entry.outTime || "—"}
+                    {entry.outTime ? formatTime(entry.outTime) : "—"}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
-                    {entry.duration || "—"}
+                  <td className="px-6 py-4 text-sm font-semibold text-green-600">
+                    {entry.outTime ? calculateDuration(entry.inTime, entry.outTime) : "—"}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span

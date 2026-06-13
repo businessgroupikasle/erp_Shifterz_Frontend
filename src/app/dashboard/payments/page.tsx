@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
@@ -27,22 +27,21 @@ export default function PaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
 
   useEffect(() => {
+    async function fetchPayments() {
+      try {
+        setIsLoading(true);
+        const data = await getPayments();
+        setPayments(data);
+        setError("");
+      } catch (err: any) {
+        setError("Failed to load payments: " + err.message);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchPayments();
   }, []);
-
-  const fetchPayments = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getPayments();
-      setPayments(data);
-      setError("");
-    } catch (err: any) {
-      setError("Failed to load payments: " + err.message);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const calculatePaymentModes = () => {
     const modes: Record<string, number> = {

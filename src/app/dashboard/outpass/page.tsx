@@ -29,22 +29,20 @@ export default function OutPassPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    async function fetchOutPasses() {
+      try {
+        setIsLoading(true);
+        const data = await getOutPasses();
+        setOutPasses(data || []);
+      } catch (err: any) {
+        setError("Failed to load outpasses: " + err.message);
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchOutPasses();
   }, []);
-
-  const fetchOutPasses = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getOutPasses();
-      setOutPasses(data || []);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || "Failed to load out passes");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSave = async (data: any) => {
     try {
