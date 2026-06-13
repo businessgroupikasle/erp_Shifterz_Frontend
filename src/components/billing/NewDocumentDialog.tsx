@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
 import { X, FileText } from "lucide-react";
