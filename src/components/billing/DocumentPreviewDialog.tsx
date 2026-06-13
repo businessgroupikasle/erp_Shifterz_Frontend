@@ -17,6 +17,7 @@ interface DocumentPreviewDialogProps {
     total: string;
     date: string;
     due: string;
+    gstNumber?: string;
   };
 }
 
@@ -181,7 +182,8 @@ export default function DocumentPreviewDialog({
                     <div class="section-title">Details</div>
                     <p><strong>Date:</strong> ${document.date}</p>
                     <p><strong>Due:</strong> ${document.due}</p>
-                    <p><strong>GSTIN:</strong> 33AAAAAO000A1Z5</p>
+                    ${document.gstNumber ? `<p><strong>Client GSTIN:</strong> ${document.gstNumber}</p>` : ''}
+                    <p><strong>Our GSTIN:</strong> 33AAAAAO000A1Z5</p>
                   </div>
                 </div>
 
@@ -287,8 +289,13 @@ export default function DocumentPreviewDialog({
                 <p className="text-sm">
                   <span className="font-semibold">Due:</span> {document.due}
                 </p>
+                {document.gstNumber && (
+                  <p className="text-sm">
+                    <span className="font-semibold">Client GSTIN:</span> {document.gstNumber}
+                  </p>
+                )}
                 <p className="text-sm">
-                  <span className="font-semibold">GSTIN:</span> 33AAAAAO000A1Z5
+                  <span className="font-semibold">Our GSTIN:</span> 33AAAAAO000A1Z5
                 </p>
               </div>
             </div>

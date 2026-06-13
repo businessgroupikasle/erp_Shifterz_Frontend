@@ -3,7 +3,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye } from "lucide-react";
+import { Plus, Eye, Circle } from "lucide-react";
 import CarCheckInDialog from "@/components/carin/CarCheckInDialog";
 import PassCarDialog from "@/components/carin/PassCarDialog";
 import CarDetailsDialog from "@/components/carin/CarDetailsDialog";
@@ -125,9 +125,9 @@ export default function CarInOutPage() {
   };
 
   const getStatusIcon = (status: string) => {
-    if (status === "Ongoing" || status === "In Workshop") return "🟢";
-    if (status === "Out" || status === "Delivered") return "🔴";
-    return "⚪";
+    if (status === "Ongoing" || status === "In Workshop") return <Circle className="w-3 h-3 fill-current" />;
+    if (status === "Out" || status === "Delivered") return <Circle className="w-3 h-3 fill-current" />;
+    return <Circle className="w-3 h-3 fill-current" />;
   };
 
   return (

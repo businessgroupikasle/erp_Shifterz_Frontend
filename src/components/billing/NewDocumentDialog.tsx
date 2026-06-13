@@ -28,6 +28,7 @@ export default function NewDocumentDialog({
     invoiceDate: new Date().toISOString().split("T")[0],
     dueDate: "",
     notes: "",
+    gstNumber: "",
   });
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export default function NewDocumentDialog({
         date: formData.invoiceDate,
         due: formData.dueDate,
         status: formData.status,
+        gstNumber: formData.gstNumber,
       };
       onSubmit(newDoc);
     }
@@ -102,6 +104,7 @@ export default function NewDocumentDialog({
       invoiceDate: new Date().toISOString().split("T")[0],
       dueDate: "",
       notes: "",
+      gstNumber: "",
     });
     onClose();
   };
@@ -291,18 +294,33 @@ export default function NewDocumentDialog({
             </div>
           </div>
 
-          {/* Row 6: Due Date */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
-              Due Date
-            </label>
-            <input
-              type="date"
-              name="dueDate"
-              value={formData.dueDate}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
-            />
+          {/* Row 6: Due Date & GST Number */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                Due Date
+              </label>
+              <input
+                type="date"
+                name="dueDate"
+                value={formData.dueDate}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                GST Number (Optional)
+              </label>
+              <input
+                type="text"
+                name="gstNumber"
+                value={formData.gstNumber}
+                onChange={handleChange}
+                placeholder="Ex: 33AAAAA0000A1Z5"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 uppercase"
+              />
+            </div>
           </div>
 
           {/* Row 7: Notes */}

@@ -22,6 +22,7 @@ interface BillingDocument {
   dueDate: string;
   status: string;
   notes: string;
+  gstNumber?: string;
 }
 
 export default function BillingPage() {
@@ -286,7 +287,8 @@ export default function BillingPage() {
           gst: (selectedDocument.gst || 0).toString(),
           total: (selectedDocument.total || 0).toString(),
           date: selectedDocument.date,
-          due: selectedDocument.dueDate
+          due: selectedDocument.dueDate,
+          gstNumber: selectedDocument.gstNumber
         } : undefined}
       />
     </div>
