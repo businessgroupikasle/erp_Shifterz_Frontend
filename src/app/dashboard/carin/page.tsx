@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Eye } from "lucide-react";
 import CarCheckInDialog from "@/components/carin/CarCheckInDialog";
@@ -23,7 +23,7 @@ interface CarEntry {
   status: "In" | "Out" | "Ongoing";
 }
 
-import { getCarInRecords, updateCarIn } from "@/lib/api";
+import { getCarInRecords, updateCarIn, createCarIn } from "@/lib/api";
 import { useEffect } from "react";
 import { calculateDuration, formatTime } from "@/lib/timeUtils";
 
@@ -37,20 +37,32 @@ export default function CarInOutPage() {
   const [cars, setCars] = useState<CarEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchCars() {
-      try {
-        setIsLoading(true);
-        const data = await getCarInRecords();
-        setCars(data || []);
-      } catch (err) {
-        console.error("Failed to fetch cars:", err);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchCars = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await getCarInRecords();
+      setCars(data || []);
+    } catch (err) {
+      console.error("Failed to fetch cars:", err);
+    } finally {
+      setIsLoading(false);
     }
-    fetchCars();
   }, []);
+
+  useEffect(() => {
+    fetchCars();
+  }, [fetchCars]);
+
+  const handleCheckInSubmit = async (carData: any) => {
+    try {
+      const newCar = await createCarIn(carData);
+      setCars([...cars, newCar]);
+      setIsDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to check-in car:", err);
+      alert("Failed to check-in car. Please try again.");
+    }
+  };
 
   const handlePassCar = (car: CarEntry) => {
     setSelectedCar(car);
@@ -197,10 +209,10 @@ export default function CarInOutPage() {
             <tbody className="divide-y divide-gray-200">
               {cars.map((entry) => (
                 <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 text-sm font-bold text-yellow-600 min-w-20">
                     {entry.entryId}
                   </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                  <td className="px-6 py-4 text-sm font-bold text-gray-900 min-w-28">
                     {entry.vehicleNo}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{entry.model}</td>
@@ -262,6 +274,7 @@ export default function CarInOutPage() {
       <CarCheckInDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
+        onSubmit={handleCheckInSubmit}
       />
       <PassCarDialog
         isOpen={isPassDialogOpen}
