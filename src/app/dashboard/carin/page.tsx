@@ -90,12 +90,16 @@ export default function CarInOutPage() {
         )
       );
       setIsPassDialogOpen(false);
-      
+
       await updateCarIn(selectedCar.id, {
         status: "Out",
         outTime: passData.outTime,
       });
-      // Optionally re-fetch: await fetchCars();
+
+      // Navigate to Out Pass page after marking car as Out
+      setTimeout(() => {
+        router.push("/dashboard/outpass");
+      }, 500);
     } catch (err) {
       console.error("Failed to update car:", err);
       alert("Failed to pass car out. Please try again.");
@@ -243,21 +247,16 @@ export default function CarInOutPage() {
                       {entry.status === "Ongoing" ? (
                         <button
                           onClick={() => handlePassCar(entry)}
-                          className="text-green-600 hover:bg-green-50 px-3 py-1 rounded font-semibold text-xs transition-colors"
+                          className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded font-semibold text-xs transition-colors flex items-center gap-1"
+                          title="Mark car as Out and create pass"
                         >
                           → Out
                         </button>
-                      ) : (
-                        <button
-                          onClick={() => router.push("/dashboard/outpass")}
-                          className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded font-semibold text-xs transition-colors"
-                        >
-                          📋 Pass
-                        </button>
-                      )}
-                      <button 
+                      ) : null}
+                      <button
                         onClick={() => handleViewCar(entry)}
-                        className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                        title="View details"
                       >
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
