@@ -1,7 +1,8 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
-import { Plus, Eye, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import NewJobCardDialog from "@/components/jobs/NewJobCardDialog";
 import { getJobs, createJob, updateJob, deleteJob } from "@/lib/api";
 

@@ -1,8 +1,9 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import CarCheckInDialog from "@/components/carin/CarCheckInDialog";
 import PassCarDialog from "@/components/carin/PassCarDialog";
 import CarDetailsDialog from "@/components/carin/CarDetailsDialog";

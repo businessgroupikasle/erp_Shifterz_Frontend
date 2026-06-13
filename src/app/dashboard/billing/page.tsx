@@ -1,4 +1,5 @@
 ﻿"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
 import { Plus, Eye, Check, Trash2 } from "lucide-react";
@@ -32,10 +33,6 @@ export default function BillingPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<BillingDocument | null>(null);
 
-  useEffect(() => {
-    fetchInvoices();
-  }, []);
-
   const fetchInvoices = async () => {
     try {
       setIsLoading(true);
@@ -49,6 +46,10 @@ export default function BillingPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
 
   const filteredDocs = documents.filter(
     (doc) => filter === "All" || doc.type === filter

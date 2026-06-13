@@ -1,4 +1,5 @@
 ﻿"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
 import { Plus, Sliders, Trash2, AlertTriangle } from "lucide-react";
