@@ -1,86 +1,306 @@
 "use client";
 
-import { Printer, X } from "lucide-react";
+import { X, Printer } from "lucide-react";
 
-interface Props {
-  pass: any | null;
+interface PrintPassDialogProps {
+  isOpen: boolean;
   onClose: () => void;
-  fmtDT: (s: string) => string;
+  pass?: {
+    passId: string;
+    vehicle: string;
+    model: string;
+    customer: string;
+    phone: string;
+    service: string;
+    outTime: string;
+    technician: string;
+    security: string;
+    remarks?: string;
+  };
 }
 
-export default function PrintPassDialog({ pass, onClose, fmtDT }: Props) {
-  if (!pass) return null;
+export default function PrintPassDialog({
+  isOpen,
+  onClose,
+  pass,
+}: PrintPassDialogProps) {
+  if (!isOpen || !pass) return null;
+
+  const handlePrint = () => {
+    const printWindow = window.open("", "", "height=800,width=800");
+    if (printWindow) {
+      const passHtml = document.getElementById("pass-preview")?.innerHTML;
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Out Pass ${pass?.passId}</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                padding: 0;
+              }
+              .pass-content {
+                border: 4px solid #FACC15;
+                border-radius: 8px;
+                padding: 32px;
+                background: linear-gradient(to bottom right, #FFFACD, #FFFFFF);
+              }
+              .text-center {
+                text-align: center;
+              }
+              .mb-6 {
+                margin-bottom: 24px;
+              }
+              .mb-2 {
+                margin-bottom: 8px;
+              }
+              .mb-8 {
+                margin-bottom: 32px;
+              }
+              .mt-4 {
+                margin-top: 16px;
+              }
+              .text-5xl {
+                font-size: 48px;
+              }
+              .text-2xl {
+                font-size: 24px;
+              }
+              .text-sm {
+                font-size: 14px;
+              }
+              .text-xs {
+                font-size: 12px;
+              }
+              .font-bold {
+                font-weight: bold;
+              }
+              .text-yellow-500 {
+                color: #FACC15;
+              }
+              .text-gray-900 {
+                color: #111827;
+              }
+              .text-gray-500 {
+                color: #6B7280;
+              }
+              .text-gray-600 {
+                color: #4B5563;
+              }
+              .text-gray-300 {
+                color: #D1D5DB;
+              }
+              .uppercase {
+                text-transform: uppercase;
+              }
+              .tracking-wide {
+                letter-spacing: 0.05em;
+              }
+              .border-b {
+                border-bottom: 1px solid #D1D5DB;
+              }
+              .pb-4 {
+                padding-bottom: 16px;
+              }
+              .grid {
+                display: grid;
+                gap: 24px;
+              }
+              .grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+              }
+              .gap-6 {
+                gap: 24px;
+              }
+              .gap-8 {
+                gap: 32px;
+              }
+              .mt-12 {
+                margin-top: 48px;
+              }
+              .pt-8 {
+                padding-top: 32px;
+              }
+              .border-t {
+                border-top: 1px solid #D1D5DB;
+              }
+              .border-t-2 {
+                border-top: 2px solid #111827;
+              }
+              .w-32 {
+                width: 128px;
+              }
+              .mx-auto {
+                margin-left: auto;
+                margin-right: auto;
+              }
+              .last\\:border-0:last-child {
+                border-bottom: none;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="pass-content">
+              ${passHtml}
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/85 z-[999] flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-md flex flex-col gap-4">
-        <div className="flex items-center justify-between text-white no-print">
-          <h3 className="font-bold text-sm">Gate Pass Print Preview</h3>
-          <div className="flex items-center gap-2">
-            <button onClick={() => window.print()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded bg-yellow-500 text-black font-extrabold cursor-pointer text-xs">
-              <Printer size={14} /> Print Now
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-8 w-full max-w-2xl shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">Out Pass Preview</h2>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handlePrint}
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Printer className="w-5 h-5" />
+              Print
             </button>
-            <button onClick={onClose} className="p-2 rounded bg-white/10 hover:bg-white/20 text-white cursor-pointer">
-              <X size={18} />
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X className="w-6 h-6 text-gray-600" />
             </button>
           </div>
         </div>
 
-        <div className="print-card rounded-2xl border p-6 flex flex-col gap-6 shadow-2xl modal-animate"
-          style={{ background: "var(--bg2)", borderColor: "var(--accent)" }}>
-          <div className="text-center border-b pb-4" style={{ borderColor: "var(--border)" }}>
-            <h2 className="text-2xl font-extrabold text-[var(--accent)] tracking-widest" style={{ fontFamily: "var(--font-syne)" }}>
-              SHIFTERZ
+        {/* Pass Preview */}
+        <div
+          id="pass-preview"
+          className="border-4 border-yellow-400 rounded-lg p-8"
+          style={{
+            background: "linear-gradient(to bottom right, #FFFACD, #FFFFFF)",
+          }}
+        >
+          {/* Header */}
+          <div className="text-center mb-6">
+            <h1 className="text-5xl font-bold text-yellow-500 mb-2">SHIFTERZ</h1>
+            <p className="text-sm text-gray-500">
+              42, RACE COURSE RD, COIMBATORE - 641018
+            </p>
+            <h2 className="text-2xl font-bold text-gray-900 mt-4">
+              VEHICLE OUT PASS
             </h2>
-            <span className="text-[9px] uppercase tracking-wider text-[var(--text3)]">Race Course Rd, Coimbatore</span>
-            <h3 className="text-sm font-bold mt-3 text-white uppercase tracking-widest">Vehicle Gate Pass</h3>
-            <span className="font-mono text-xs opacity-60">Pass No: {pass.id}</span>
+            <p className="text-sm text-gray-600 mt-1">Pass No: {pass.passId}</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            {[
-              ["Vehicle No", pass.vehicle],
-              ["Car Model", pass.model || "—"],
-              ["Customer", pass.customer],
-              ["Phone", pass.phone || "—"],
-            ].map(([label, value]) => (
-              <div key={label} className="p-3 border rounded-xl" style={{ background: "var(--bg3)", borderColor: "var(--border)" }}>
-                <div className="text-[9px] uppercase font-bold text-[var(--text3)]">{label}</div>
-                <div className="font-bold text-sm mt-0.5">{value}</div>
-              </div>
-            ))}
-            <div className="p-3 border rounded-xl col-span-2" style={{ background: "var(--bg3)", borderColor: "var(--border)" }}>
-              <div className="text-[9px] uppercase font-bold text-[var(--text3)]">Service Done</div>
-              <div className="font-semibold mt-0.5">{pass.service || "—"}</div>
+          {/* Details Grid */}
+          <div className="grid grid-cols-2 gap-6 mb-8">
+            {/* Vehicle No. */}
+            <div className="border-b border-gray-300 pb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Vehicle No.
+              </p>
+              <p className="text-lg font-bold text-gray-900">{pass.vehicle}</p>
             </div>
-            <div className="p-3 border rounded-xl" style={{ background: "var(--bg3)", borderColor: "var(--border)" }}>
-              <div className="text-[9px] uppercase font-bold text-[var(--text3)]">Date & Time</div>
-              <div className="mt-0.5">{fmtDT(pass.outTime)}</div>
+
+            {/* Car Model */}
+            <div className="border-b border-gray-300 pb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Car Model
+              </p>
+              <p className="text-lg font-bold text-gray-900">{pass.model}</p>
             </div>
-            <div className="p-3 border rounded-xl" style={{ background: "var(--bg3)", borderColor: "var(--border)" }}>
-              <div className="text-[9px] uppercase font-bold text-[var(--text3)]">Security Gate</div>
-              <div className="mt-0.5">{pass.securityName || "—"}</div>
+
+            {/* Customer */}
+            <div className="border-b border-gray-300 pb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Customer
+              </p>
+              <p className="text-lg font-bold text-gray-900">{pass.customer}</p>
+            </div>
+
+            {/* Phone */}
+            <div className="border-b border-gray-300 pb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Phone
+              </p>
+              <p className="text-lg font-bold text-gray-900">{pass.phone}</p>
+            </div>
+
+            {/* Service Done */}
+            <div className="border-b border-gray-300 pb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Service Done
+              </p>
+              <p className="text-lg font-bold text-gray-900">{pass.service}</p>
+            </div>
+
+            {/* Out Date/Time */}
+            <div className="border-b border-gray-300 pb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Out Date/Time
+              </p>
+              <p className="text-lg font-bold text-gray-900">{pass.outTime}</p>
+            </div>
+
+            {/* Technician */}
+            <div className="border-b border-gray-300 pb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Technician
+              </p>
+              <p className="text-lg font-bold text-gray-900">{pass.technician}</p>
+            </div>
+
+            {/* Security */}
+            <div className="border-b border-gray-300 pb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Security
+              </p>
+              <p className="text-lg font-bold text-gray-900">{pass.security}</p>
             </div>
           </div>
 
+          {/* Remarks */}
           {pass.remarks && (
-            <div className="p-3 border rounded-xl text-xs" style={{ background: "var(--bg3)", borderColor: "var(--border)" }}>
-              <div className="text-[9px] uppercase font-bold text-[var(--text3)]">Remarks</div>
-              <p className="mt-0.5 italic opacity-85">{pass.remarks}</p>
+            <div className="mb-8">
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                Remarks
+              </p>
+              <p className="text-gray-900">{pass.remarks}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4 text-center mt-6 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
-            <div>
-              <div className="h-10" />
-              <span className="text-[10px] uppercase font-semibold text-[var(--text3)] border-t pt-1.5 block">Authorised Signature</span>
+          {/* Signature Lines */}
+          <div className="grid grid-cols-2 gap-8 mt-12 pt-8 border-t border-gray-300">
+            <div className="text-center">
+              <div className="border-t-2 border-gray-900 w-32 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">Authorised By</p>
             </div>
-            <div>
-              <div className="h-10" />
-              <span className="text-[10px] uppercase font-semibold text-[var(--text3)] border-t pt-1.5 block">Customer Signature</span>
+            <div className="text-center">
+              <div className="border-t-2 border-gray-900 w-32 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">Customer Signature</p>
             </div>
           </div>
         </div>
+
+        {/* Print Styles */}
+        <style>{`
+          @media print {
+            body {
+              margin: 0;
+              padding: 0;
+            }
+            .fixed {
+              position: static !important;
+              background: white !important;
+            }
+            .fixed::before {
+              display: none !important;
+            }
+          }
+        `}</style>
       </div>
     </div>
   );

@@ -1,85 +1,219 @@
 "use client";
 
-import { Boxes, X } from "lucide-react";
+import { useState } from "react";
+import { X, Package } from "lucide-react";
 
-interface ItmForm { name: string; unit: string; category: string; stock: number; reorder: number; cost: number; supplier: string; location: string; }
-interface Props {
-  open: boolean; onClose: () => void; onSubmit: (e: React.FormEvent) => void;
-  form: ItmForm; setForm: (f: ItmForm) => void; isEdit: boolean;
+interface InventoryItemDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit?: (item: any) => void;
 }
 
-const S = { background: "var(--bg3)", borderColor: "var(--border2)", color: "var(--text)" };
-const cls = "px-3 py-2 rounded-lg text-sm border w-full";
-const lbl = (t: string) => <label className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--text3)" }}>{t}</label>;
+export default function InventoryItemDialog({
+  isOpen,
+  onClose,
+  onSubmit,
+}: InventoryItemDialogProps) {
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "PPF",
+    unit: "Meter / Bottle / Kit",
+    stock: "",
+    costPerUnit: "",
+    reorderLevel: "",
+    supplier: "",
+    location: "",
+  });
 
-export default function InventoryItemDialog({ open, onClose, onSubmit, form, setForm, isEdit }: Props) {
-  if (!open) return null;
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.stock || !formData.costPerUnit) {
+      alert("Item name, stock, and cost are required");
+      return;
+    }
+
+    if (onSubmit) {
+      onSubmit(formData);
+    }
+
+    setFormData({
+      name: "",
+      category: "PPF",
+      unit: "Meter / Bottle / Kit",
+      stock: "",
+      costPerUnit: "",
+      reorderLevel: "",
+      supplier: "",
+      location: "",
+    });
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border shadow-2xl overflow-hidden modal-animate"
-        style={{ background: "var(--bg2)", borderColor: "var(--border2)" }}>
-        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "var(--border)" }}>
-          <h3 className="font-bold text-base flex items-center gap-2" style={{ color: "var(--text)" }}>
-            <Boxes size={18} style={{ color: "var(--accent)" }} /> {isEdit ? "Edit Inventory Item" : "Add Stock Item"}
-          </h3>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer" style={{ color: "var(--text3)" }}
-            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--bg3)")}
-            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}>
-            <X size={16} />
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-yellow-400 p-2 rounded-lg">
+              <Package className="w-6 h-6 text-gray-900" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Add Inventory Item</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="w-6 h-6 text-gray-600" />
           </button>
         </div>
-        <div className="overflow-y-auto max-h-[80vh] px-6 py-5">
-          <form onSubmit={onSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">{lbl("Item Name *")}
-              <input type="text" placeholder="XPEL PPF Film 50ft" value={form.name} required style={S}
-                onChange={e => setForm({ ...form, name: e.target.value })} className={cls} />
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Row 1: Item Name & Category */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Item Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="XPEL PPF Film"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                required
+              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">{lbl("Measuring Unit")}
-                <select value={form.unit} style={S} onChange={e => setForm({ ...form, unit: e.target.value })} className={cls}>
-                  {["Meter","Piece","Kit","Litre","Bottle"].map(u => <option key={u}>{u}</option>)}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5">{lbl("Category")}
-                <select value={form.category} style={S} onChange={e => setForm({ ...form, category: e.target.value })} className={cls}>
-                  <option value="PPF">PPF Films</option>
-                  <option value="Coating">Coatings</option>
-                  <option value="Consumable">Consumables</option>
-                  <option value="Chemical">Chemicals</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Category
+              </label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              >
+                <option>PPF</option>
+                <option>Coating</option>
+                <option>Consumable</option>
+                <option>Chemical</option>
+              </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">{lbl("Available Stock *")}
-                <input type="number" placeholder="25" value={form.stock || ""} required style={S}
-                  onChange={e => setForm({ ...form, stock: Number(e.target.value) })} className={cls} />
-              </div>
-              <div className="flex flex-col gap-1.5">{lbl("Reorder Threshold *")}
-                <input type="number" placeholder="5" value={form.reorder || ""} required style={S}
-                  onChange={e => setForm({ ...form, reorder: Number(e.target.value) })} className={cls} />
-              </div>
+          </div>
+
+          {/* Row 2: Unit & Opening Stock */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Unit
+              </label>
+              <input
+                type="text"
+                name="unit"
+                value={formData.unit}
+                onChange={handleChange}
+                placeholder="Meter / Bottle / Kit"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              />
             </div>
-            <div className="flex flex-col gap-1.5">{lbl("Cost Price (Per Unit)")}
-              <input type="number" placeholder="850" value={form.cost || ""} style={S}
-                onChange={e => setForm({ ...form, cost: Number(e.target.value) })} className={cls} />
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Opening Stock
+              </label>
+              <input
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                placeholder="0"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                required
+              />
             </div>
-            <div className="flex flex-col gap-1.5">{lbl("Supplier Name")}
-              <input type="text" placeholder="XPEL India Pvt Ltd" value={form.supplier} style={S}
-                onChange={e => setForm({ ...form, supplier: e.target.value })} className={cls} />
+          </div>
+
+          {/* Row 3: Cost Per Unit & Reorder Level */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Cost Per Unit (₹) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="costPerUnit"
+                value={formData.costPerUnit}
+                onChange={handleChange}
+                placeholder="0"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                required
+              />
             </div>
-            <div className="flex flex-col gap-1.5">{lbl("Storage Rack / Location")}
-              <input type="text" placeholder="Rack A1" value={form.location} style={S}
-                onChange={e => setForm({ ...form, location: e.target.value })} className={cls} />
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Reorder Level
+              </label>
+              <input
+                type="number"
+                name="reorderLevel"
+                value={formData.reorderLevel}
+                onChange={handleChange}
+                placeholder="5"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              />
             </div>
-            <div className="flex gap-3 pt-1">
-              <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-semibold border cursor-pointer"
-                style={{ background: "var(--bg3)", borderColor: "var(--border2)", color: "var(--text2)" }}>Cancel</button>
-              <button type="submit" className="flex-1 py-2.5 rounded-lg bg-[var(--accent)] text-black font-extrabold text-sm cursor-pointer">
-                {isEdit ? "Save Changes" : "Add Item"}
-              </button>
+          </div>
+
+          {/* Row 4: Supplier & Storage Location */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Supplier
+              </label>
+              <input
+                type="text"
+                name="supplier"
+                value={formData.supplier}
+                onChange={handleChange}
+                placeholder="Supplier name"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              />
             </div>
-          </form>
-        </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Storage Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="Rack A1"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              />
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
+          >
+            ✓ Save Item
+          </button>
+        </form>
       </div>
     </div>
   );

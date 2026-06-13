@@ -102,7 +102,7 @@ export default function FranchisePage() {
           onClick={handleAdd}
           className="bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm"
         >
-          <Plus className="w-4 h-4 stroke-[3]" /> Add Franchise
+          <Plus className="w-4 h-4 stroke-3" /> Add Franchise
         </button>
       </div>
 

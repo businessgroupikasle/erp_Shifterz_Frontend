@@ -1,227 +1,215 @@
 "use client";
 
-import { Car, X } from "lucide-react";
-
-interface CheckInForm {
-  vehicle: string;
-  model: string;
-  customer: string;
-  phone: string;
-  service: string;
-  technicianIn: string;
-  odometer: string;
-  inTime: string;
-  notes: string;
-}
+import { useState } from "react";
+import { X, Car } from "lucide-react";
 
 interface CarCheckInDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
-  onSubmit: (e: React.FormEvent) => void;
-  form: CheckInForm;
-  setForm: (form: CheckInForm) => void;
-  services: { id: string; name: string }[];
-  technicians: string[];
 }
 
 export default function CarCheckInDialog({
-  open,
+  isOpen,
   onClose,
-  onSubmit,
-  form,
-  setForm,
-  services,
-  technicians,
 }: CarCheckInDialogProps) {
-  if (!open) return null;
+  const [formData, setFormData] = useState({
+    vehicleNumber: "",
+    carModel: "",
+    customerName: "",
+    phone: "",
+    service: "PPF Full Body",
+    technician: "Arjun",
+    odometer: "",
+    inTime: "",
+    notes: "",
+  });
 
-  const field = (label: string, required = false) => (
-    <label className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--text3)" }}>
-      {label}{required && " *"}
-    </label>
-  );
-
-  const inputCls = "px-3 py-2 rounded-lg text-sm border w-full";
-  const inputStyle = {
-    background: "var(--bg3)",
-    borderColor: "var(--border2)",
-    color: "var(--text)",
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Car Check-In:", formData);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div
-        className="relative w-full max-w-lg rounded-2xl border shadow-2xl overflow-hidden modal-animate"
-        style={{ background: "var(--bg2)", borderColor: "var(--border2)" }}
-      >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <h3
-            className="font-bold text-base flex items-center gap-2"
-            style={{ color: "var(--text)" }}
-          >
-            <Car size={18} style={{ color: "var(--accent)" }} />
-            Car Check-In
-          </h3>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-8 w-full max-w-2xl shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Car className="w-6 h-6 text-yellow-500" />
+            <h2 className="text-2xl font-bold text-gray-900">Car Check-In</h2>
+          </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors"
-            style={{ color: "var(--text3)" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--bg3)")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
+            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X size={16} />
+            <X className="w-6 h-6 text-gray-600" />
           </button>
         </div>
 
-        {/* Form */}
-        <div className="overflow-y-auto max-h-[80vh] px-6 py-5">
-          <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-            <div className="flex flex-col gap-1.5">
-              {field("Vehicle Number", true)}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Row 1: Vehicle Number & Car Model */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Vehicle Number <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
+                name="vehicleNumber"
+                value={formData.vehicleNumber}
+                onChange={handleChange}
                 placeholder="TN 04 XX 0000"
-                value={form.vehicle}
-                onChange={(e) => setForm({ ...form, vehicle: e.target.value.toUpperCase() })}
-                className={inputCls}
-                style={inputStyle}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                 required
               />
             </div>
-
-            <div className="flex flex-col gap-1.5">
-              {field("Car Model", true)}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Car Model <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
+                name="carModel"
+                value={formData.carModel}
+                onChange={handleChange}
                 placeholder="Toyota Fortuner"
-                value={form.model}
-                onChange={(e) => setForm({ ...form, model: e.target.value })}
-                className={inputCls}
-                style={inputStyle}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                 required
               />
             </div>
+          </div>
 
-            <div className="flex flex-col gap-1.5">
-              {field("Customer Name", true)}
+          {/* Row 2: Customer Name & Phone */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Customer Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                placeholder="Full Name"
-                value={form.customer}
-                onChange={(e) => setForm({ ...form, customer: e.target.value })}
-                className={inputCls}
-                style={inputStyle}
+                name="customerName"
+                value={formData.customerName}
+                onChange={handleChange}
+                placeholder="Full name"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                 required
               />
             </div>
-
-            <div className="flex flex-col gap-1.5">
-              {field("Phone Number")}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Phone
+              </label>
               <input
-                type="text"
-                placeholder="98765 43210"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className={inputCls}
-                style={inputStyle}
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+91 XXXXX XXXXX"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
               />
             </div>
+          </div>
 
-            <div className="flex flex-col gap-1.5">
-              {field("Service", true)}
+          {/* Row 3: Service & Technician */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Service <span className="text-red-500">*</span>
+              </label>
               <select
-                value={form.service}
-                onChange={(e) => setForm({ ...form, service: e.target.value })}
-                className={inputCls}
-                style={inputStyle}
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white"
               >
-                {services.map((svc) => (
-                  <option key={svc.id} value={svc.name}>{svc.name}</option>
-                ))}
+                <option>PPF Full Body</option>
+                <option>PPF Bonnet</option>
+                <option>C3 Coating</option>
+                <option>Graphene Coating</option>
+                <option>Interior Detailing</option>
               </select>
             </div>
-
-            <div className="flex flex-col gap-1.5">
-              {field("Technician")}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Technician
+              </label>
               <select
-                value={form.technicianIn}
-                onChange={(e) => setForm({ ...form, technicianIn: e.target.value })}
-                className={inputCls}
-                style={inputStyle}
+                name="technician"
+                value={formData.technician}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white"
               >
-                {technicians.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
+                <option>Arjun</option>
+                <option>Sathish</option>
+                <option>Kumar</option>
+                <option>Rajesh</option>
               </select>
             </div>
+          </div>
 
-            <div className="flex flex-col gap-1.5">
-              {field("Odometer (km)")}
+          {/* Row 4: Odometer & In Time */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Odometer (KM)
+              </label>
               <input
                 type="number"
-                placeholder="45000"
-                value={form.odometer}
-                onChange={(e) => setForm({ ...form, odometer: e.target.value })}
-                className={inputCls}
-                style={inputStyle}
+                name="odometer"
+                value={formData.odometer}
+                onChange={handleChange}
+                placeholder="42500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
               />
             </div>
-
-            <div className="flex flex-col gap-1.5">
-              {field("In Time")}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                In Time
+              </label>
               <input
                 type="datetime-local"
-                value={form.inTime}
-                onChange={(e) => setForm({ ...form, inTime: e.target.value })}
-                className={inputCls}
-                style={inputStyle}
+                name="inTime"
+                value={formData.inTime}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
               />
             </div>
+          </div>
 
-            <div className="flex flex-col gap-1.5 sm:col-span-2">
-              {field("Notes / Pre-existing Conditions")}
-              <textarea
-                placeholder="Scratches on bonnet, dents on rear bumper..."
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                rows={3}
-                className={`${inputCls} resize-none`}
-                style={inputStyle}
-              />
-            </div>
+          {/* Row 5: Notes */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Notes / Condition
+            </label>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              placeholder="Pre-existing scratches, dents, special instructions..."
+              rows={4}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent resize-none"
+            />
+          </div>
 
-            {/* Footer actions */}
-            <div className="sm:col-span-2 flex gap-3 pt-1">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 py-2.5 rounded-lg text-sm font-semibold border cursor-pointer transition-colors"
-                style={{
-                  background: "var(--bg3)",
-                  borderColor: "var(--border2)",
-                  color: "var(--text2)",
-                }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text)")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text2)")}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 py-2.5 rounded-lg bg-[var(--accent)] text-black font-extrabold text-sm cursor-pointer transition-all"
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.9")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-              >
-                Submit Check-In
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            ✓ Check-In Car
+          </button>
+        </form>
       </div>
     </div>
   );

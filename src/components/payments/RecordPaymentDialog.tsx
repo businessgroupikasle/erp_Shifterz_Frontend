@@ -1,87 +1,215 @@
 "use client";
 
-import { CreditCard, X, Check } from "lucide-react";
+import { useState } from "react";
+import { X, CreditCard } from "lucide-react";
 
-interface PayForm { invoiceId: string; amount: number; mode: string; ref: string; date: string; notes: string; }
-interface Props {
-  open: boolean; onClose: () => void; onSubmit: (e: React.FormEvent) => void;
-  form: PayForm; setForm: (f: PayForm) => void;
-  pendingInvoices: any[]; onInvoiceChange: (id: string) => void;
-  fmt: (n: number) => string;
+interface RecordPaymentDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit?: (payment: any) => void;
 }
 
-const S = { background: "var(--bg3)", borderColor: "var(--border2)", color: "var(--text)" };
-const cls = "px-3 py-2 rounded-lg text-sm border w-full";
-const lbl = (t: string) => <label className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--text3)" }}>{t}</label>;
+export default function RecordPaymentDialog({
+  isOpen,
+  onClose,
+  onSubmit,
+}: RecordPaymentDialogProps) {
+  const [formData, setFormData] = useState({
+    client: "",
+    invoiceNo: "",
+    amount: "",
+    mode: "UPI",
+    date: new Date().toISOString().split("T")[0],
+    reference: "",
+    notes: "",
+  });
 
-export default function RecordPaymentDialog({ open, onClose, onSubmit, form, setForm, pendingInvoices, onInvoiceChange, fmt }: Props) {
-  if (!open) return null;
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.client.trim() || !formData.amount) {
+      alert("Client name and amount are required");
+      return;
+    }
+
+    if (onSubmit) {
+      const newPayment = {
+        id: `PAY${String(Math.floor(Math.random() * 100000)).padStart(5, "0")}`,
+        invoiceRef: formData.invoiceNo || "—",
+        client: formData.client,
+        amount: `₹${parseFloat(formData.amount).toLocaleString("en-IN")}`,
+        mode: formData.mode,
+        date: new Date(formData.date).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+        reference: formData.reference || "—",
+        notes: formData.notes || "—",
+      };
+      onSubmit(newPayment);
+    }
+
+    setFormData({
+      client: "",
+      invoiceNo: "",
+      amount: "",
+      mode: "UPI",
+      date: new Date().toISOString().split("T")[0],
+      reference: "",
+      notes: "",
+    });
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border shadow-2xl overflow-hidden modal-animate"
-        style={{ background: "var(--bg2)", borderColor: "var(--border2)" }}>
-        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "var(--border)" }}>
-          <h3 className="font-bold text-base flex items-center gap-2" style={{ color: "var(--text)" }}>
-            <CreditCard size={18} style={{ color: "var(--accent)" }} /> Record Payment Receipt
-          </h3>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer" style={{ color: "var(--text3)" }}
-            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "var(--bg3)")}
-            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}>
-            <X size={16} />
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-yellow-400 p-2 rounded-lg">
+              <CreditCard className="w-6 h-6 text-gray-900" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Record Payment</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="w-6 h-6 text-gray-600" />
           </button>
         </div>
-        <div className="overflow-y-auto max-h-[80vh] px-6 py-5">
-          {pendingInvoices.length === 0 ? (
-            <div className="text-center py-6 flex flex-col items-center gap-2">
-              <Check size={32} style={{ color: "var(--success)" }} />
-              <span className="text-sm font-medium" style={{ color: "var(--text)" }}>All invoices are fully paid!</span>
-              <span className="text-xs" style={{ color: "var(--text3)" }}>No outstanding billing dues found.</span>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Row 1: Client Name & Invoice No */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Client Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="client"
+                value={formData.client}
+                onChange={handleChange}
+                placeholder="Full name"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                required
+              />
             </div>
-          ) : (
-            <form onSubmit={onSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">{lbl("Select Pending Invoice *")}
-                <select value={form.invoiceId} style={S} onChange={e => onInvoiceChange(e.target.value)} className={cls}>
-                  {pendingInvoices.map(inv => {
-                    const total = inv.amount + inv.gst - inv.discount;
-                    return <option key={inv.id} value={inv.id}>{inv.id} — {inv.client} ({fmt(total)})</option>;
-                  })}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5">{lbl("Amount Received *")}
-                <input type="number" value={form.amount || ""} required style={S}
-                  onChange={e => setForm({ ...form, amount: Number(e.target.value) })} className={cls} />
-              </div>
-              <div className="flex flex-col gap-1.5">{lbl("Payment Mode")}
-                <select value={form.mode} style={S} onChange={e => setForm({ ...form, mode: e.target.value })} className={cls}>
-                  <option value="UPI">UPI / GPay</option>
-                  <option value="Cash">Cash</option>
-                  <option value="Card">Credit/Debit Card</option>
-                  <option value="BankTransfer">Bank Transfer</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5">{lbl("Transaction / Bank Reference No")}
-                <input type="text" placeholder="Ref: UPI-XXXXXX" value={form.ref} style={S}
-                  onChange={e => setForm({ ...form, ref: e.target.value })} className={cls} />
-              </div>
-              <div className="flex flex-col gap-1.5">{lbl("Receipt Date")}
-                <input type="date" value={form.date} style={S}
-                  onChange={e => setForm({ ...form, date: e.target.value })} className={cls} />
-              </div>
-              <div className="flex flex-col gap-1.5">{lbl("Notes")}
-                <textarea placeholder="Partial payment, cash received by front desk..." value={form.notes} rows={3}
-                  onChange={e => setForm({ ...form, notes: e.target.value })}
-                  className={`${cls} resize-none`} style={S} />
-              </div>
-              <div className="flex gap-3 pt-1">
-                <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-semibold border cursor-pointer"
-                  style={{ background: "var(--bg3)", borderColor: "var(--border2)", color: "var(--text2)" }}>Cancel</button>
-                <button type="submit" className="flex-1 py-2.5 rounded-lg bg-[var(--accent)] text-black font-extrabold text-sm cursor-pointer">
-                  Confirm Receipt
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Invoice No.
+              </label>
+              <input
+                type="text"
+                name="invoiceNo"
+                value={formData.invoiceNo}
+                onChange={handleChange}
+                placeholder="INV-XXXX"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Amount & Payment Mode */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Amount (₹) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="amount"
+                value={formData.amount}
+                onChange={handleChange}
+                placeholder="0"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Payment Mode
+              </label>
+              <select
+                name="mode"
+                value={formData.mode}
+                onChange={handleChange}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              >
+                <option>UPI</option>
+                <option>Cash</option>
+                <option>Card</option>
+                <option>NEFT</option>
+                <option>Cheque</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 3: Date & Reference No */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Date
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Reference No.
+              </label>
+              <input
+                type="text"
+                name="reference"
+                value={formData.reference}
+                onChange={handleChange}
+                placeholder="UPI ref / cheque no."
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              />
+            </div>
+          </div>
+
+          {/* Row 4: Notes */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+              Notes
+            </label>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              placeholder="Partial payment, advance, etc."
+              rows={3}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 resize-none"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
+          >
+            ✓ Save Payment
+          </button>
+        </form>
       </div>
     </div>
   );
