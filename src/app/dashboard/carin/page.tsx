@@ -20,7 +20,7 @@ interface CarEntry {
   inTime: string;
   outTime: string | null;
   duration: string | null;
-  status: "In" | "Out" | "Ongoing";
+  status: string;
 }
 
 import { getCarInRecords, updateCarIn, createCarIn } from "@/lib/api";
@@ -96,7 +96,7 @@ export default function CarInOutPage() {
         outTime: passData.outTime,
       });
 
-      // Navigate to Out Pass page after marking car as Out
+      router.push("/dashboard/outpass");
       setTimeout(() => {
         router.push("/dashboard/outpass");
       }, 500);
@@ -107,15 +107,17 @@ export default function CarInOutPage() {
     }
   };
 
-  const inWorkshop = cars.filter((c) => c.status === "Ongoing").length;
+  const inWorkshop = cars.filter((c) => c.status === "Ongoing" || c.status === "In Workshop").length;
   const totalToday = cars.length;
-  const delivered = cars.filter((c) => c.status === "Out").length;
+  const delivered = cars.filter((c) => c.status === "Out" || c.status === "Delivered").length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Ongoing":
+      case "In Workshop":
         return "bg-green-100 text-green-700";
       case "Out":
+      case "Delivered":
         return "bg-red-100 text-red-700";
       default:
         return "bg-gray-100 text-gray-700";
@@ -123,8 +125,8 @@ export default function CarInOutPage() {
   };
 
   const getStatusIcon = (status: string) => {
-    if (status === "Ongoing") return "🟢";
-    if (status === "Out") return "🔴";
+    if (status === "Ongoing" || status === "In Workshop") return "🟢";
+    if (status === "Out" || status === "Delivered") return "🔴";
     return "⚪";
   };
 
@@ -213,10 +215,10 @@ export default function CarInOutPage() {
             <tbody className="divide-y divide-gray-200">
               {cars.map((entry) => (
                 <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-bold text-yellow-600 min-w-20">
-                    {entry.entryId}
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                    {entry.entryId || entry.id}
                   </td>
-                  <td className="px-6 py-4 text-sm font-bold text-gray-900 min-w-28">
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                     {entry.vehicleNo}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{entry.model}</td>
@@ -244,7 +246,7 @@ export default function CarInOutPage() {
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex items-center gap-2">
-                      {entry.status === "Ongoing" ? (
+                      {entry.status === "Ongoing" || entry.status === "In Workshop" ? (
                         <button
                           onClick={() => handlePassCar(entry)}
                           className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded font-semibold text-xs transition-colors flex items-center gap-1"

@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import NewJobCardDialog from "@/components/jobs/NewJobCardDialog";
 import { getJobs, createJob, updateJob, deleteJob } from "@/lib/api";
@@ -12,22 +12,23 @@ export default function JobCardsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchJobs() {
-      try {
-        setIsLoading(true);
-        const data = await getJobs();
-        setJobs(data || []);
-        setError(null);
-      } catch (err: any) {
-        setError("Failed to load jobs: " + err.message);
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchJobs = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await getJobs();
+      setJobs(data || []);
+      setError(null);
+    } catch (err: any) {
+      setError("Failed to load jobs: " + err.message);
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-    fetchJobs();
   }, []);
+
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
 
   const handleSave = async (data: any) => {
     try {

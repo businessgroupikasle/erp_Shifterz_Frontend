@@ -187,7 +187,7 @@ export async function createCarIn(carIn: any) {
 }
 
 export async function updateCarIn(id: string, carIn: any) {
-  return apiCall(`/carin/${id}`, {
+  return apiCall(`/carin/${id}/checkout`, {
     method: "PUT",
     body: JSON.stringify(carIn),
   });
@@ -203,6 +203,13 @@ export async function getOutPasses() {
 export async function createOutPass(outPass: any) {
   return apiCall("/outpass", {
     method: "POST",
+    body: JSON.stringify(outPass),
+  });
+}
+
+export async function updateOutPass(id: string, outPass: any) {
+  return apiCall(`/outpass/${id}`, {
+    method: "PUT",
     body: JSON.stringify(outPass),
   });
 }

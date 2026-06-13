@@ -6,11 +6,13 @@ import { X, Car } from "lucide-react";
 interface CarCheckInDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmit?: (data: any) => void;
 }
 
 export default function CarCheckInDialog({
   isOpen,
   onClose,
+  onSubmit,
 }: CarCheckInDialogProps) {
   const [formData, setFormData] = useState({
     vehicleNumber: "",
@@ -39,7 +41,35 @@ export default function CarCheckInDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Car Check-In:", formData);
+    if (onSubmit) {
+      onSubmit({
+        id: Date.now().toString(),
+        entryId: `IN-${String(Math.floor(Math.random() * 1000)).padStart(4, "0")}`,
+        vehicleNo: formData.vehicleNumber,
+        vehicle: formData.vehicleNumber,
+        model: formData.carModel,
+        customer: formData.customerName,
+        phone: formData.phone,
+        service: formData.service,
+        technician: formData.technician,
+        technicianIn: formData.technician,
+        inTime: formData.inTime || new Date().toISOString(),
+        status: "Ongoing",
+        notes: formData.notes,
+        odometer: formData.odometer,
+      });
+    }
+    setFormData({
+      vehicleNumber: "",
+      carModel: "",
+      customerName: "",
+      phone: "",
+      service: "PPF Full Body",
+      technician: "Arjun",
+      odometer: "",
+      inTime: "",
+      notes: "",
+    });
     onClose();
   };
 

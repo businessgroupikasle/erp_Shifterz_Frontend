@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 import AddFranchiseDialog from "@/components/franchise/AddFranchiseDialog";
 import { getFranchises, createFranchise, updateFranchise, deleteFranchise } from "@/lib/api";
@@ -13,22 +13,23 @@ export default function FranchisePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchFranchises() {
-      try {
-        setIsLoading(true);
-        const data = await getFranchises();
-        setFranchises(data || []);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || "Failed to load franchises");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchFranchises = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await getFranchises();
+      setFranchises(data || []);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || "Failed to load franchises");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-    fetchFranchises();
   }, []);
+
+  useEffect(() => {
+    fetchFranchises();
+  }, [fetchFranchises]);
 
   const handleAdd = () => {
     setEditingFranchise(null);

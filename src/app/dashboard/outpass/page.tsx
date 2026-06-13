@@ -1,23 +1,25 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Printer, Edit2 } from "lucide-react";
 import NewOutPassDialog from "@/components/outpass/NewOutPassDialog";
 import PrintPassDialog from "@/components/outpass/PrintPassDialog";
-import { getOutPasses, createOutPass } from "@/lib/api";
+import { getOutPasses, createOutPass, updateOutPass } from "@/lib/api";
 
 interface OutPass {
   id: string;
-  passId: string;
+  passId?: string;
   vehicle: string;
   model: string;
   customer: string;
   phone: string;
   service: string;
   outTime: string;
-  technician: string;
-  security: string;
+  technician?: string;
+  technicianName?: string;
+  security?: string;
+  securityName?: string;
 }
 
 export default function OutPassPage() {
@@ -25,31 +27,40 @@ export default function OutPassPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [selectedPass, setSelectedPass] = useState<OutPass | null>(null);
+  const [editingPass, setEditingPass] = useState<OutPass | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchOutPasses() {
-      try {
-        setIsLoading(true);
-        const data = await getOutPasses();
-        setOutPasses(data || []);
-      } catch (err: any) {
-        setError("Failed to load outpasses: " + err.message);
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchOutPasses = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await getOutPasses();
+      setOutPasses(data || []);
+    } catch (err: any) {
+      setError("Failed to load outpasses: " + err.message);
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-    fetchOutPasses();
   }, []);
+
+  useEffect(() => {
+    fetchOutPasses();
+  }, [fetchOutPasses]);
 
   const handleSave = async (data: any) => {
     try {
-      await createOutPass(data);
+      if (editingPass) {
+        await updateOutPass(editingPass.id, data);
+      } else {
+        await createOutPass(data);
+      }
       await fetchOutPasses();
+      setIsDialogOpen(false);
+      setEditingPass(null);
     } catch (err) {
       console.error("Failed to save out pass:", err);
+      alert("Failed to save out pass.");
     }
   };
 
@@ -76,7 +87,10 @@ export default function OutPassPage() {
           🟨 Total Passes: {totalPasses}
         </div>
         <button
-          onClick={() => setIsDialogOpen(true)}
+          onClick={() => {
+            setEditingPass(null);
+            setIsDialogOpen(true);
+          }}
           className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -129,7 +143,7 @@ export default function OutPassPage() {
               {outPasses.map((pass) => (
                 <tr key={pass.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-semibold text-yellow-600">
-                    {pass.passId}
+                    {pass.passId || pass.id}
                   </td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                     {pass.vehicle}
@@ -142,9 +156,9 @@ export default function OutPassPage() {
                   <td className="px-6 py-4 text-sm text-gray-700">{pass.service}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{pass.outTime}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    {pass.technician}
+                    {pass.technicianName || pass.technician}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{pass.security}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{pass.securityName || pass.security}</td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex items-center gap-2">
                       <button
@@ -154,7 +168,13 @@ export default function OutPassPage() {
                         <Printer className="w-3.5 h-3.5" />
                         Print
                       </button>
-                      <button className="p-1.5 hover:bg-gray-100 rounded transition-colors">
+                      <button 
+                        onClick={() => {
+                          setEditingPass(pass);
+                          setIsDialogOpen(true);
+                        }}
+                        className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                      >
                         <Edit2 className="w-4 h-4 text-gray-600" />
                       </button>
                     </div>
@@ -170,12 +190,22 @@ export default function OutPassPage() {
       {/* Dialogs */}
       <NewOutPassDialog
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setEditingPass(null);
+        }}
+        onSubmit={handleSave}
+        initialData={editingPass}
       />
       <PrintPassDialog
         isOpen={isPrintOpen}
         onClose={() => setIsPrintOpen(false)}
-        pass={selectedPass || undefined}
+        pass={selectedPass ? {
+          ...selectedPass,
+          passId: selectedPass.passId || selectedPass.id,
+          technician: selectedPass.technicianName || selectedPass.technician || "",
+          security: selectedPass.securityName || selectedPass.security || ""
+        } : undefined}
       />
     </div>
   );

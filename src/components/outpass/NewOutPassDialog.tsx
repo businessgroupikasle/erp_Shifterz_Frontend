@@ -1,17 +1,21 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Ticket } from "lucide-react";
 
 interface NewOutPassDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmit?: (data: any) => void;
+  initialData?: any;
 }
 
 export default function NewOutPassDialog({
   isOpen,
   onClose,
+  onSubmit,
+  initialData,
 }: NewOutPassDialogProps) {
   const [formData, setFormData] = useState({
     vehicleNumber: "",
@@ -25,6 +29,36 @@ export default function NewOutPassDialog({
     destination: "",
     reason: "",
   });
+
+  useEffect(() => {
+    if (initialData && isOpen) {
+      setFormData({
+        vehicleNumber: initialData.vehicle || "",
+        carModel: initialData.model || "",
+        customerName: initialData.customer || "",
+        phone: initialData.phone || "",
+        service: initialData.service || "",
+        technician: initialData.technicianName || initialData.technician || "",
+        outTime: initialData.outTime ? new Date(initialData.outTime).toISOString().slice(0,16) : "",
+        security: initialData.securityName || initialData.security || "",
+        destination: "",
+        reason: initialData.remarks || "",
+      });
+    } else if (!isOpen) {
+      setFormData({
+        vehicleNumber: "",
+        carModel: "",
+        customerName: "",
+        phone: "",
+        service: "",
+        technician: "",
+        outTime: "",
+        security: "",
+        destination: "",
+        reason: "",
+      });
+    }
+  }, [initialData, isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -41,7 +75,31 @@ export default function NewOutPassDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("New Out Pass:", formData);
+    if (onSubmit) {
+      onSubmit({
+        vehicle: formData.vehicleNumber,
+        model: formData.carModel,
+        customer: formData.customerName,
+        phone: formData.phone,
+        service: formData.service,
+        outTime: formData.outTime || new Date().toISOString(),
+        securityName: formData.security,
+        technicianName: formData.technician,
+        remarks: formData.reason,
+      });
+    }
+    setFormData({
+      vehicleNumber: "",
+      carModel: "",
+      customerName: "",
+      phone: "",
+      service: "",
+      technician: "",
+      outTime: "",
+      security: "",
+      destination: "",
+      reason: "",
+    });
     onClose();
   };
 

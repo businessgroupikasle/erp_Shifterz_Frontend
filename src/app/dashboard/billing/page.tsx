@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
@@ -282,9 +282,9 @@ export default function BillingPage() {
           phone: selectedDocument.phone,
           vehicle: selectedDocument.vehicle,
           service: selectedDocument.service,
-          base: selectedDocument.amount.toString(),
-          gst: selectedDocument.gst.toString(),
-          total: selectedDocument.total.toString(),
+          base: (selectedDocument.amount || 0).toString(),
+          gst: (selectedDocument.gst || 0).toString(),
+          total: (selectedDocument.total || 0).toString(),
           date: selectedDocument.date,
           due: selectedDocument.dueDate
         } : undefined}

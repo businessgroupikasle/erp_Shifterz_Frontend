@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Edit2, Trash2, Search } from "lucide-react";
 import AddServiceDialog from "@/components/services/AddServiceDialog";
 import { getServices, createService, deleteService } from "@/lib/api";
@@ -13,22 +13,23 @@ export default function ServicesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchServices() {
-      try {
-        setIsLoading(true);
-        const data = await getServices();
-        setServices(data || []);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || "Failed to load services");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchServices = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await getServices();
+      setServices(data || []);
+      setError(null);
+    } catch (err: any) {
+      setError("Failed to load services: " + err.message);
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-    fetchServices();
   }, []);
+
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
 
   const handleAdd = () => {
     setEditingService(null);
