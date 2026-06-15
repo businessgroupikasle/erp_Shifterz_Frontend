@@ -322,9 +322,12 @@ export default function DocumentPreviewDialog({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-3xl shadow-xl flex flex-col max-h-[95vh]">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">Document Preview</h2>
+      <div className="bg-white rounded-lg w-full max-w-4xl shadow-xl flex flex-col max-h-[95vh]">
+        <div className="flex items-center justify-between p-6 border-b bg-gray-50">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">{document?.type} Preview</h2>
+            <p className="text-sm text-gray-500 mt-1">Doc No: {document?.docNo}</p>
+          </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handlePrint}
@@ -339,6 +342,26 @@ export default function DocumentPreviewDialog({
             >
               <X className="w-6 h-6 text-gray-600" />
             </button>
+          </div>
+        </div>
+
+        {/* Info Header */}
+        <div className="grid grid-cols-4 gap-4 p-6 bg-blue-50 border-b border-blue-100">
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase">Client Name</p>
+            <p className="text-lg font-bold text-gray-900">{document?.client}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase">Phone</p>
+            <p className="text-lg font-bold text-gray-900">{document?.phone}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase">Vehicle</p>
+            <p className="text-lg font-bold text-gray-900">{document?.vehicle}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase">Total Amount</p>
+            <p className="text-lg font-bold text-green-600">{document?.total}</p>
           </div>
         </div>
 

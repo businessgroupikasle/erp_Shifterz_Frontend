@@ -3,6 +3,7 @@
 
 import { X, Check } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getSettings } from "@/lib/api";
 
 interface ServiceData {
   id?: string;
@@ -23,6 +24,7 @@ interface AddServiceDialogProps {
 
 export default function AddServiceDialog({ isOpen, onClose, serviceData, onSave }: AddServiceDialogProps) {
   const [mounted, setMounted] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
   const [formData, setFormData] = useState<ServiceData>({
     name: "",
     category: "PPF",
@@ -37,19 +39,29 @@ export default function AddServiceDialog({ isOpen, onClose, serviceData, onSave 
   }, []);
 
   useEffect(() => {
+    if (isOpen) {
+      getSettings().then(data => {
+        if (data?.categories) {
+          setCategories(data.categories);
+        }
+      }).catch(console.error);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (serviceData) {
       setFormData(serviceData);
     } else {
       setFormData({
         name: "",
-        category: "PPF",
+        category: categories.length > 0 ? categories[0] : "PPF",
         price: "",
         duration: "",
         warranty: "",
         description: "",
       });
     }
-  }, [serviceData, isOpen]);
+  }, [serviceData, isOpen, categories]);
 
   if (!mounted || !isOpen) return null;
 
@@ -104,10 +116,18 @@ export default function AddServiceDialog({ isOpen, onClose, serviceData, onSave 
                 onChange={e => setFormData({...formData, category: e.target.value})}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors"
               >
-                <option value="PPF">PPF</option>
-                <option value="Coating">Coating</option>
-                <option value="Detailing">Detailing</option>
-                <option value="Add-on">Add-on</option>
+                {categories.length > 0 ? (
+                  categories.map((cat, i) => (
+                    <option key={i} value={cat}>{cat}</option>
+                  ))
+                ) : (
+                  <>
+                    <option value="PPF">PPF</option>
+                    <option value="Coating">Coating</option>
+                    <option value="Detailing">Detailing</option>
+                    <option value="Add-on">Add-on</option>
+                  </>
+                )}
               </select>
             </div>
             

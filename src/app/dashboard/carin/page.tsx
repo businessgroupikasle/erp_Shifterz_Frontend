@@ -3,7 +3,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Circle } from "lucide-react";
+import { Plus, Eye, Circle, Edit } from "lucide-react";
 import CarCheckInDialog from "@/components/carin/CarCheckInDialog";
 import PassCarDialog from "@/components/carin/PassCarDialog";
 import CarDetailsDialog from "@/components/carin/CarDetailsDialog";
@@ -23,7 +23,7 @@ interface CarEntry {
   status: string;
 }
 
-import { getCarInRecords, updateCarIn, createCarIn } from "@/lib/api";
+import { getCarInRecords, updateCarIn, createCarIn, editCarIn } from "@/lib/api";
 import { useEffect } from "react";
 import { calculateDuration, formatTime } from "@/lib/timeUtils";
 
@@ -55,13 +55,26 @@ export default function CarInOutPage() {
 
   const handleCheckInSubmit = async (carData: any) => {
     try {
-      const newCar = await createCarIn(carData);
-      setCars([...cars, newCar]);
+      if (selectedCar && isDialogOpen) {
+        // Edit Mode
+        await editCarIn(selectedCar.id, carData);
+        await fetchCars();
+      } else {
+        // Create Mode
+        const newCar = await createCarIn(carData);
+        setCars([...cars, newCar]);
+      }
       setIsDialogOpen(false);
+      setSelectedCar(null);
     } catch (err) {
-      console.error("Failed to check-in car:", err);
-      alert("Failed to check-in car. Please try again.");
+      console.error("Failed to save car:", err);
+      alert("Failed to save car. Please try again.");
     }
+  };
+
+  const handleEditCar = (car: CarEntry) => {
+    setSelectedCar(car);
+    setIsDialogOpen(true);
   };
 
   const handlePassCar = (car: CarEntry) => {
@@ -145,7 +158,7 @@ export default function CarInOutPage() {
         </div>
         <div className="ml-auto">
           <button
-            onClick={() => setIsDialogOpen(true)}
+            onClick={() => { setSelectedCar(null); setIsDialogOpen(true); }}
             className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
           >
             <Plus className="w-5 h-5" />
@@ -256,6 +269,13 @@ export default function CarInOutPage() {
                         </button>
                       ) : null}
                       <button
+                        onClick={() => handleEditCar(entry)}
+                        className="p-1.5 hover:bg-gray-100 rounded transition-colors text-blue-600"
+                        title="Edit details"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => handleViewCar(entry)}
                         className="p-1.5 hover:bg-gray-100 rounded transition-colors"
                         title="View details"
@@ -274,8 +294,9 @@ export default function CarInOutPage() {
       {/* Dialogs */}
       <CarCheckInDialog
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => { setIsDialogOpen(false); setSelectedCar(null); }}
         onSubmit={handleCheckInSubmit}
+        initialData={selectedCar}
       />
       <PassCarDialog
         isOpen={isPassDialogOpen}

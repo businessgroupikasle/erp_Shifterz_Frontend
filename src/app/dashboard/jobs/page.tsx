@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import NewJobCardDialog from "@/components/jobs/NewJobCardDialog";
 import { getJobs, createJob, updateJob, deleteJob } from "@/lib/api";
 
@@ -11,6 +11,7 @@ export default function JobCardsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -43,13 +44,24 @@ export default function JobCardsPage() {
     }
   };
 
+  const handleEdit = (job: any) => {
+    setSelectedJob(job);
+    setIsDialogOpen(true);
+  };
+
   const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this job?")) return;
     try {
       await deleteJob(id);
       setJobs(jobs.filter(j => j.id !== id));
     } catch (err) {
       console.error("Failed to delete job:", err);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedJob(null);
   };
   
   const stats = {
@@ -146,7 +158,22 @@ export default function JobCardsPage() {
                   </td>
                   <td className="px-6 py-4 text-gray-500 text-xs max-w-[150px] truncate">{j.notes}</td>
                   <td className="px-6 py-4 text-right">
-                    <button onClick={() => handleDelete(j.id)} className="p-1.5 hover:bg-red-50 rounded-md text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleEdit(j)}
+                        className="p-1.5 hover:bg-blue-50 rounded-md text-blue-500 transition-colors"
+                        title="Edit job"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(j.id)}
+                        className="p-1.5 hover:bg-red-50 rounded-md text-red-400 transition-colors"
+                        title="Delete job"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -157,8 +184,9 @@ export default function JobCardsPage() {
 
       <NewJobCardDialog
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={handleCloseDialog}
         onSave={handleSave}
+        initialData={selectedJob}
       />
     </div>
   );

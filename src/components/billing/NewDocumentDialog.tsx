@@ -2,7 +2,9 @@
 /* eslint-disable react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
-import { X, FileText, Plus, Trash2 } from "lucide-react";
+import { X, FileText, Plus, Trash2, Loader2 } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { fetchVehicleDetails } from "@/lib/api";
 
 interface NewDocumentDialogProps {
   isOpen: boolean;
@@ -49,6 +51,51 @@ export default function NewDocumentDialog({
   const [items, setItems] = useState([{ desc: "Industrial Pump Model X100", qty: 1, price: 0, amount: 0 }]);
   const [baseAmount, setBaseAmount] = useState(0);
   const [gstAmount, setGstAmount] = useState(0);
+  const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
+
+  const handleVehicleBlur = async () => {
+    const vNo = formData.vehicle.trim().toUpperCase();
+    if (!vNo) return;
+    
+    setIsFetchingVehicle(true);
+    try {
+      const data = await fetchVehicleDetails(vNo);
+      if (data && data.name) {
+        setFormData((prev) => ({
+          ...prev,
+          client: prev.client || data.name,
+          phone: prev.phone || data.phone,
+        }));
+        toast.success("Vehicle details auto-filled!");
+      }
+    } catch (err) {
+      // Vehicle not found or error, do nothing silently
+    } finally {
+      setIsFetchingVehicle(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        type: "Invoice",
+        status: "Pending",
+        client: "",
+        phone: "",
+        vehicle: "",
+        discount: "",
+        invoiceDate: new Date().toISOString().split("T")[0],
+        dueDate: "",
+        notes: "",
+        gstNumber: "",
+        bankDetails: "Bank: Example Bank\nAccount Name: ABC Trading Pvt. Ltd.\nAccount No.: XXXXXXXX",
+        paymentTerms: "50% advance payment.\nBalance before shipment.",
+        deliveryTerms: "Delivery within 15 days after receipt of advance payment.",
+        authorizedSignatory: "Authorized Signatory",
+      });
+      setItems([{ desc: "", qty: 1, price: 0, amount: 0 }]);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     let subtotal = 0;
@@ -89,6 +136,8 @@ export default function NewDocumentDialog({
       setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
     } else if (name === "vehicle") {
       setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+    } else if (name === "gstNumber") {
+      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase().slice(0, 15) }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -131,24 +180,7 @@ export default function NewDocumentDialog({
       onSubmit(newDoc);
     }
     
-    // Reset form
-    setFormData({
-      type: "Invoice",
-      status: "Pending",
-      client: "",
-      phone: "",
-      vehicle: "",
-      discount: "",
-      invoiceDate: new Date().toISOString().split("T")[0],
-      dueDate: "",
-      notes: "",
-      gstNumber: "",
-      bankDetails: "Bank: Example Bank\nAccount Name: ABC Trading Pvt. Ltd.\nAccount No.: XXXXXXXX",
-      paymentTerms: "50% advance payment.\nBalance before shipment.",
-      deliveryTerms: "Delivery within 15 days after receipt of advance payment.",
-      authorizedSignatory: "Authorized Signatory",
-    });
-    setItems([{ desc: "", qty: 1, price: 0, amount: 0 }]);
+    // Reset handled by useEffect when isOpen becomes false
     onClose();
   };
 
@@ -235,6 +267,13 @@ export default function NewDocumentDialog({
                 onChange={handleChange}
                 placeholder="+91"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50"
+                minLength={10}
+                maxLength={10}
+                pattern="[0-9]{10}"
+                onInvalid={(e) => {
+                  e.preventDefault();
+                  toast.error("Phone number must be exactly 10 digits");
+                }}
               />
             </div>
           </div>
@@ -242,14 +281,16 @@ export default function NewDocumentDialog({
           {/* Row 3: Vehicle & Dates */}
           <div className="grid grid-cols-3 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
-                Vehicle No.
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 flex justify-between">
+                <span>Vehicle No.</span>
+                {isFetchingVehicle && <Loader2 className="w-3 h-3 animate-spin text-gray-400" />}
               </label>
               <input
                 type="text"
                 name="vehicle"
                 value={formData.vehicle}
                 onChange={handleChange}
+                onBlur={handleVehicleBlur}
                 placeholder="TN 04 XX 0000"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50 uppercase"
               />
@@ -263,7 +304,7 @@ export default function NewDocumentDialog({
                 name="invoiceDate"
                 value={formData.invoiceDate}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50 uppercase"
               />
             </div>
             <div>
@@ -275,7 +316,7 @@ export default function NewDocumentDialog({
                 name="dueDate"
                 value={formData.dueDate}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50 uppercase"
               />
             </div>
           </div>
@@ -470,6 +511,7 @@ export default function NewDocumentDialog({
                 name="gstNumber"
                 value={formData.gstNumber}
                 onChange={handleChange}
+                maxLength={15}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 text-sm uppercase"
               />
             </div>

@@ -2,10 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
-import { Plus, Eye, Check, Trash2 } from "lucide-react";
+import { Plus, Eye, Check, Trash2, Search, Receipt } from "lucide-react";
 import NewDocumentDialog from "@/components/billing/NewDocumentDialog";
 import DocumentPreviewDialog from "@/components/billing/DocumentPreviewDialog";
-import { getInvoices, createInvoice, updateInvoice, deleteInvoice } from "@/lib/api";
+import RecordPaymentDialog from "@/components/payments/RecordPaymentDialog";
+import PaymentReceiptDialog from "@/components/payments/PaymentReceiptDialog";
+import { getInvoices, createInvoice, updateInvoice, deleteInvoice, createPayment } from "@/lib/api";
 
 interface BillingDocument {
   id: string;
@@ -37,7 +39,11 @@ export default function BillingPage() {
   const [filter, setFilter] = useState("All");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
+  const [isPaymentReceiptOpen, setIsPaymentReceiptOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<BillingDocument | null>(null);
+  const [documentToMarkPaid, setDocumentToMarkPaid] = useState<BillingDocument | null>(null);
+  const [selectedPaymentDocument, setSelectedPaymentDocument] = useState<BillingDocument | null>(null);
 
   const fetchInvoices = async () => {
     try {
@@ -57,9 +63,18 @@ export default function BillingPage() {
     fetchInvoices();
   }, []);
 
-  const filteredDocs = documents.filter(
-    (doc) => filter === "All" || doc.type === filter
-  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const filteredDocs = documents.filter((doc) => {
+    const matchesFilter = filter === "All" || doc.type === filter;
+    const matchesSearch = doc.client?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          doc.vehicle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          doc.id?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDate = (!startDate || doc.date >= startDate) && (!endDate || doc.date <= endDate);
+    return matchesFilter && matchesSearch && matchesDate;
+  });
 
   const totalInvoiced = documents.reduce((sum, doc) => sum + (doc.amount + doc.gst - doc.discount), 0);
   const collected = documents
@@ -112,19 +127,47 @@ export default function BillingPage() {
     }
   };
 
-  const handleMarkAsPaid = async (id: string) => {
+  const handleMarkAsPaid = (id: string) => {
+    const doc = documents.find((d) => d.id === id);
+    if (doc && doc.status !== "Paid") {
+      setDocumentToMarkPaid(doc);
+      setIsRecordPaymentOpen(true);
+    }
+  };
+
+  const handleRecordPayment = async (paymentData: any) => {
     try {
-      const doc = documents.find((d) => d.id === id);
-      if (doc && doc.status !== "Paid") {
-        await updateInvoice(id, { ...doc, status: "Paid" });
-        setDocuments(
-          documents.map((d) =>
-            d.id === id ? { ...d, status: "Paid" } : d
-          )
-        );
-      }
+      if (!documentToMarkPaid) return;
+
+      const invoiceId = documentToMarkPaid.id;
+      const totalAmount = (documentToMarkPaid.amount || 0) + (documentToMarkPaid.gst || 0) - (documentToMarkPaid.discount || 0);
+
+      const paymentRecord = {
+        invoiceId,
+        client: documentToMarkPaid.client,
+        phone: documentToMarkPaid.phone,
+        vehicle: documentToMarkPaid.vehicle,
+        service: documentToMarkPaid.service,
+        amount: totalAmount,
+        mode: paymentData.mode || "Cash",
+        date: paymentData.date || new Date().toISOString().split("T")[0],
+        ref: paymentData.reference || invoiceId,
+        notes: paymentData.notes || "",
+      };
+
+      await createPayment(paymentRecord);
+      await updateInvoice(invoiceId, { ...documentToMarkPaid, status: "Paid" });
+
+      setDocuments(
+        documents.map((d) =>
+          d.id === invoiceId ? { ...d, status: "Paid" } : d
+        )
+      );
+
+      setIsRecordPaymentOpen(false);
+      setDocumentToMarkPaid(null);
     } catch (err: any) {
-      alert("Failed to update: " + err.message);
+      alert("Failed to record payment: " + err.message);
     }
   };
 
@@ -169,30 +212,63 @@ export default function BillingPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex gap-2">
-          {["All", "Invoice", "Quotation", "Estimate", "Proforma"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
-                filter === tab
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            {["All", "Invoice", "Quotation", "Estimate", "Proforma"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
+                  filter === tab
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            New Document
+          </button>
         </div>
 
-        <button
-          onClick={() => setIsDialogOpen(true)}
-          className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          New Document
-        </button>
+        <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex-1 relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Search by client, vehicle or doc no..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-600">From:</span>
+            <input 
+              type="date" 
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-600">To:</span>
+            <input 
+              type="date" 
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Table */}
@@ -244,6 +320,7 @@ export default function BillingPage() {
                           setIsPreviewOpen(true);
                         }}
                         className="p-1 hover:bg-gray-200 rounded transition-colors"
+                        title="View Invoice"
                       >
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
@@ -254,12 +331,26 @@ export default function BillingPage() {
                             ? "bg-green-100"
                             : "hover:bg-gray-200"
                         }`}
+                        title={doc.status === "Paid" ? "Paid" : "Mark as Paid"}
                       >
                         <Check className={`w-4 h-4 ${doc.status === "Paid" ? "text-green-600" : "text-gray-600"}`} />
                       </button>
+                      {doc.status === "Paid" && (
+                        <button
+                          onClick={() => {
+                            setSelectedPaymentDocument(doc);
+                            setIsPaymentReceiptOpen(true);
+                          }}
+                          className="p-1 hover:bg-blue-100 rounded transition-colors"
+                          title="View Payment Details"
+                        >
+                          <Receipt className="w-4 h-4 text-blue-600" />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDeleteDocument(doc.id)}
                         className="p-1 hover:bg-red-100 rounded transition-colors"
+                        title="Delete"
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </button>
@@ -300,6 +391,41 @@ export default function BillingPage() {
           paymentTerms: selectedDocument.paymentTerms,
           deliveryTerms: selectedDocument.deliveryTerms,
           authorizedSignatory: selectedDocument.authorizedSignatory
+        } : undefined}
+      />
+      <RecordPaymentDialog
+        isOpen={isRecordPaymentOpen}
+        onClose={() => {
+          setIsRecordPaymentOpen(false);
+          setDocumentToMarkPaid(null);
+        }}
+        onSubmit={handleRecordPayment}
+        invoiceData={documentToMarkPaid ? {
+          id: documentToMarkPaid.id,
+          client: documentToMarkPaid.client,
+          phone: documentToMarkPaid.phone,
+          amount: (documentToMarkPaid.amount || 0) + (documentToMarkPaid.gst || 0) - (documentToMarkPaid.discount || 0),
+          date: documentToMarkPaid.date
+        } : undefined}
+      />
+      <PaymentReceiptDialog
+        isOpen={isPaymentReceiptOpen}
+        onClose={() => {
+          setIsPaymentReceiptOpen(false);
+          setSelectedPaymentDocument(null);
+        }}
+        payment={selectedPaymentDocument ? {
+          id: `PAY-${selectedPaymentDocument.id}`,
+          invoiceRef: selectedPaymentDocument.id,
+          client: selectedPaymentDocument.client,
+          phone: selectedPaymentDocument.phone,
+          vehicle: selectedPaymentDocument.vehicle,
+          service: selectedPaymentDocument.service,
+          amount: ((selectedPaymentDocument.amount || 0) + (selectedPaymentDocument.gst || 0) - (selectedPaymentDocument.discount || 0)).toString(),
+          mode: "Paid",
+          date: selectedPaymentDocument.date,
+          reference: selectedPaymentDocument.id,
+          notes: selectedPaymentDocument.notes
         } : undefined}
       />
     </div>

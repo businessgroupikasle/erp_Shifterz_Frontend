@@ -29,39 +29,44 @@ const sidebarSections = [
     ],
   },
   {
-    label: "WORKSHOP",
+    label: "WORKSHOP MANAGEMENT",
     items: [
       { label: "Car In / Out", icon: Car, href: "/dashboard/carin" },
+      { label: "Job Cards", icon: Briefcase, href: "/dashboard/jobs" },
+      { label: "Services", icon: Wrench, href: "/dashboard/services" },
       { label: "Out Pass", icon: Ticket, href: "/dashboard/outpass" },
     ],
   },
   {
-    label: "SALES & CRM",
+    label: "CRM",
     items: [
       { label: "Leads", icon: Users, href: "/dashboard/leads" },
+      { label: "Customers", icon: Users2, href: "/dashboard/customers" },
+      { label: "Franchise", icon: Building2, href: "/dashboard/franchise" },
+    ],
+  },
+  {
+    label: "SALES & BILLING",
+    items: [
       { label: "Billing", icon: FileText, href: "/dashboard/billing" },
       { label: "Payments", icon: CreditCard, href: "/dashboard/payments" },
     ],
   },
   {
-    label: "OPERATIONS",
+    label: "INVENTORY",
     items: [
-      { label: "Services", icon: Wrench, href: "/dashboard/services" },
       { label: "Inventory", icon: Package, href: "/dashboard/inventory" },
-      { label: "Job Cards", icon: Briefcase, href: "/dashboard/jobs" },
-    ],
-  },
-  {
-    label: "GROWTH",
-    items: [
-      { label: "Franchise", icon: Building2, href: "/dashboard/franchise" },
-      { label: "Customers", icon: Users2, href: "/dashboard/customers" },
     ],
   },
   {
     label: "ANALYTICS",
     items: [
       { label: "Reports", icon: PieChart, href: "/dashboard/reports" },
+    ],
+  },
+  {
+    label: "ADMINISTRATION",
+    items: [
       { label: "Settings", icon: Settings, href: "/dashboard/settings" },
     ],
   },

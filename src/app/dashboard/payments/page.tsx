@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
-import { Plus, FileText, Trash2 } from "lucide-react";
+import { Plus, FileText, Trash2, Search } from "lucide-react";
 import PaymentReceiptDialog from "@/components/payments/PaymentReceiptDialog";
 import RecordPaymentDialog from "@/components/payments/RecordPaymentDialog";
 import { getPayments, createPayment, deletePayment } from "@/lib/api";
@@ -11,6 +11,9 @@ interface Payment {
   id: string;
   invoiceId: string;
   client: string;
+  phone?: string;
+  vehicle?: string;
+  service?: string;
   amount: number;
   mode: string;
   date: string;
@@ -43,6 +46,18 @@ export default function PaymentsPage() {
     fetchPayments();
   }, []);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const filteredPayments = payments.filter((p) => {
+    const matchesSearch = p.client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          p.invoiceId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          p.ref?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDate = (!startDate || p.date >= startDate) && (!endDate || p.date <= endDate);
+    return matchesSearch && matchesDate;
+  });
+
   const calculatePaymentModes = () => {
     const modes: Record<string, number> = {
       UPI: 0,
@@ -52,7 +67,7 @@ export default function PaymentsPage() {
       Cheque: 0,
     };
 
-    payments.forEach((p) => {
+    filteredPayments.forEach((p) => {
       const amount = p.amount || 0;
       if (modes[p.mode] !== undefined) {
         modes[p.mode] += amount;
@@ -118,15 +133,48 @@ export default function PaymentsPage() {
         </div>
       </div>
 
-      {/* Action Bar */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => setIsRecordPaymentOpen(true)}
-          className="bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4 stroke-3" />
-          Record Payment
-        </button>
+      {/* Action Bar & Filters */}
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-end">
+          <button
+            onClick={() => setIsRecordPaymentOpen(true)}
+            className="bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4 stroke-3" />
+            Record Payment
+          </button>
+        </div>
+        
+        <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+          <div className="flex-1 relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Search by client, invoice or ref..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b]"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">From:</span>
+            <input 
+              type="date" 
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-gray-700 font-medium"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">To:</span>
+            <input 
+              type="date" 
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-gray-700 font-medium"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Table */}
@@ -146,7 +194,7 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {payments.map((p) => (
+              {filteredPayments.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 text-gray-400 font-medium text-xs">{p.id}</td>
                   <td className="px-6 py-4 text-[#eab308] font-semibold text-xs">{p.invoiceId || "-"}</td>
@@ -200,10 +248,14 @@ export default function PaymentsPage() {
           id: selectedPayment.id,
           invoiceRef: selectedPayment.invoiceId,
           client: selectedPayment.client,
+          phone: selectedPayment.phone,
+          vehicle: selectedPayment.vehicle,
+          service: selectedPayment.service,
           amount: selectedPayment.amount.toString(),
           mode: selectedPayment.mode,
           date: selectedPayment.date,
-          reference: selectedPayment.ref
+          reference: selectedPayment.ref,
+          notes: selectedPayment.notes
         } : undefined}
       />
     </div>

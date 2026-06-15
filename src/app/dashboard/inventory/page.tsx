@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Plus, Sliders, Trash2, AlertTriangle } from "lucide-react";
 import InventoryItemDialog from "@/components/inventory/InventoryItemDialog";
 import AdjustStockDialog from "@/components/inventory/AdjustStockDialog";
-import { getInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/api";
+import { getInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem, getSettings } from "@/lib/api";
 
 interface InventoryItem {
   id: string;
@@ -28,20 +28,28 @@ export default function InventoryPage() {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [filterCategory, setFilterCategory] = useState("All Categories");
 
+  const [dbCategories, setDbCategories] = useState<string[]>([]);
+
   useEffect(() => {
-    async function fetchInventory() {
+    async function fetchInventoryAndSettings() {
       try {
         setIsLoading(true);
-        const data = await getInventory();
-        setItems(data);
+        const [invData, settingsData] = await Promise.all([
+          getInventory(),
+          getSettings()
+        ]);
+        setItems(invData);
+        if (settingsData?.categories) {
+          setDbCategories(settingsData.categories);
+        }
       } catch (err: any) {
-        setError("Failed to load inventory: " + err.message);
+        setError("Failed to load data: " + err.message);
         console.error(err);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchInventory();
+    fetchInventoryAndSettings();
   }, []);
 
   const lowStockItems = items.filter((item) => item.stock <= item.reorder);
@@ -151,10 +159,18 @@ export default function InventoryPage() {
           className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
         >
           <option>All Categories</option>
-          <option>PPF</option>
-          <option>Coating</option>
-          <option>Consumable</option>
-          <option>Chemical</option>
+          {dbCategories.length > 0 ? (
+            dbCategories.map((cat, i) => (
+              <option key={i} value={cat}>{cat}</option>
+            ))
+          ) : (
+            <>
+              <option>PPF</option>
+              <option>Coating</option>
+              <option>Consumable</option>
+              <option>Chemical</option>
+            </>
+          )}
         </select>
 
         <button

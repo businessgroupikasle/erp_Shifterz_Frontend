@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download } from "lucide-react";
+import { Download, Wallet, Users, ClipboardList, Wrench } from "lucide-react";
 import { getReports } from "@/lib/api";
 
 export default function ReportsPage() {
@@ -152,7 +152,7 @@ export default function ReportsPage() {
         {/* Revenue by Service */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span className="text-xl">💰</span> Revenue by Service
+            <Wallet className="w-5 h-5 text-yellow-500" /> Revenue by Service
           </h3>
           <div className="space-y-4">
             {serviceRevenue.length === 0 ? (
@@ -183,7 +183,7 @@ export default function ReportsPage() {
         {/* Lead Source Analysis */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span className="text-xl">😊</span> Lead Source Analysis
+            <Users className="w-5 h-5 text-blue-500" /> Lead Source Analysis
           </h3>
           <div className="space-y-4">
             {leadSources.length === 0 ? (
@@ -220,7 +220,7 @@ export default function ReportsPage() {
         {/* Invoice Aging */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span className="text-xl">📋</span> Invoice Aging
+            <ClipboardList className="w-5 h-5 text-purple-500" /> Invoice Aging
           </h3>
           <div className="space-y-3">
             {billingData.length === 0 ? (
@@ -256,7 +256,7 @@ export default function ReportsPage() {
         {/* Job Summary */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span className="text-xl">🔧</span> Job Summary
+            <Wrench className="w-5 h-5 text-orange-500" /> Job Summary
           </h3>
           <div className="space-y-3">
             {jobSummary.length === 0 ? (

@@ -9,10 +9,14 @@ interface PaymentReceiptDialogProps {
     id: string;
     invoiceRef: string;
     client: string;
+    phone?: string;
+    vehicle?: string;
+    service?: string;
     amount: string;
     mode: string;
     date: string;
     reference: string;
+    notes?: string;
   };
 }
 
@@ -178,44 +182,80 @@ export default function PaymentReceiptDialog({
 
           {/* Content */}
           <div className="bg-white px-8 py-6 space-y-4">
+            {/* Client & Contact Info Header */}
+            <div className="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase mb-1">Client Name</p>
+                  <p className="text-xl font-bold text-gray-900">{payment.client}</p>
+                </div>
+                <div className="text-right">
+                  {payment.phone && (
+                    <>
+                      <p className="text-xs text-gray-500 uppercase mb-1">Phone</p>
+                      <p className="text-lg font-semibold text-gray-900">{payment.phone}</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Invoice Details */}
             <div className="flex justify-between py-3 border-b border-gray-200">
-              <span className="text-sm text-gray-500">Client</span>
-              <span className="font-semibold text-gray-900">{payment.client}</span>
+              <span className="text-sm text-gray-500">Invoice ID</span>
+              <span className="font-semibold text-yellow-600">{payment.invoiceRef}</span>
+            </div>
+
+            {payment.vehicle && (
+              <div className="flex justify-between py-3 border-b border-gray-200">
+                <span className="text-sm text-gray-500">Vehicle</span>
+                <span className="font-semibold text-gray-900">{payment.vehicle}</span>
+              </div>
+            )}
+
+            {payment.service && (
+              <div className="flex justify-between py-3 border-b border-gray-200">
+                <span className="text-sm text-gray-500">Service</span>
+                <span className="font-semibold text-gray-900">{payment.service}</span>
+              </div>
+            )}
+
+            {/* Payment Details */}
+            <div className="flex justify-between py-3 border-b border-gray-200 bg-green-50 px-3 rounded">
+              <span className="text-sm text-gray-500 font-bold">Amount Paid</span>
+              <span className="font-bold text-green-600 text-lg">{payment.amount}</span>
             </div>
 
             <div className="flex justify-between py-3 border-b border-gray-200">
-              <span className="text-sm text-gray-500">Invoice</span>
+              <span className="text-sm text-gray-500">Payment Mode</span>
               <span className="font-semibold text-gray-900">
-                {payment.invoiceRef}
+                <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded text-xs font-bold">
+                  {payment.mode}
+                </span>
               </span>
             </div>
 
             <div className="flex justify-between py-3 border-b border-gray-200">
-              <span className="text-sm text-gray-500">Amount</span>
-              <span className="font-semibold text-gray-900">{payment.amount}</span>
-            </div>
-
-            <div className="flex justify-between py-3 border-b border-gray-200">
-              <span className="text-sm text-gray-500">Mode</span>
-              <span className="font-semibold text-gray-900">{payment.mode}</span>
-            </div>
-
-            <div className="flex justify-between py-3 border-b border-gray-200">
-              <span className="text-sm text-gray-500">Date</span>
+              <span className="text-sm text-gray-500">Payment Date</span>
               <span className="font-semibold text-gray-900">{payment.date}</span>
             </div>
 
-            <div className="flex justify-between py-3">
+            <div className="flex justify-between py-3 border-b border-gray-200">
               <span className="text-sm text-gray-500">Reference</span>
-              <span className="font-semibold text-gray-900">
-                {payment.reference}
-              </span>
+              <span className="font-semibold text-gray-900">{payment.reference}</span>
             </div>
+
+            {payment.notes && (
+              <div className="py-3 border-b border-gray-200">
+                <span className="text-sm text-gray-500">Notes</span>
+                <p className="font-semibold text-gray-900 mt-2 text-sm">{payment.notes}</p>
+              </div>
+            )}
 
             {/* Footer */}
             <div className="text-center pt-6 border-t border-gray-200 mt-6">
-              <p className="text-sm text-gray-600 mb-1">Thank you!</p>
-              <p className="text-sm text-gray-600">0422-123 4567</p>
+              <p className="text-sm text-gray-600 mb-1">Thank you for your payment!</p>
+              <p className="text-sm text-gray-600">For queries: 0422-123 4567</p>
             </div>
           </div>
         </div>

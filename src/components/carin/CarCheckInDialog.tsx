@@ -1,18 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Car, Clock, Calendar } from "lucide-react";
+import { X, Car, Clock, Calendar, Plus } from "lucide-react";
+import { toast } from "react-hot-toast";
+import AddTechnicianDialog from "./AddTechnicianDialog";
 
 interface CarCheckInDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (data: any) => void;
+  initialData?: any;
 }
 
 export default function CarCheckInDialog({
   isOpen,
   onClose,
   onSubmit,
+  initialData,
 }: CarCheckInDialogProps) {
   const [formData, setFormData] = useState({
     vehicleNumber: "",
@@ -28,19 +32,29 @@ export default function CarCheckInDialog({
 
   const [currentTime, setCurrentTime] = useState<string>("");
   const [displayTime, setDisplayTime] = useState<string>("");
+  const [isAddTechnicianOpen, setIsAddTechnicianOpen] = useState(false);
+  const [technicians, setTechnicians] = useState<string[]>([
+    "Arjun",
+    "Sathish",
+    "Kumar",
+    "Rajesh",
+  ]);
 
   const updateCurrentTime = () => {
     const now = new Date();
     const month = (now.getMonth() + 1).toString().padStart(2, "0");
     const day = now.getDate().toString().padStart(2, "0");
     const year = now.getFullYear();
-    const hours = now.getHours().toString().padStart(2, "0");
+
+    // Convert to 12-hour format
+    const hours24 = now.getHours();
+    const hours12 = hours24 % 12 || 12;
     const minutes = now.getMinutes().toString().padStart(2, "0");
     const seconds = now.getSeconds().toString().padStart(2, "0");
-    const ampm = now.getHours() >= 12 ? "PM" : "AM";
+    const ampm = hours24 >= 12 ? "PM" : "AM";
 
-    const headerTime = `${hours}:${minutes}:${seconds} ${ampm}`;
-    const fieldTime = `${month}/${day}/${year} ${hours}:${minutes} ${ampm}`;
+    const headerTime = `${hours12}:${minutes}:${seconds} ${ampm}`;
+    const fieldTime = `${month}/${day}/${year} ${hours12}:${minutes} ${ampm}`;
 
     setCurrentTime(headerTime);
     setDisplayTime(fieldTime);
@@ -49,11 +63,36 @@ export default function CarCheckInDialog({
 
   useEffect(() => {
     if (isOpen) {
-      updateCurrentTime();
-      const timer = setInterval(updateCurrentTime, 1000);
-      return () => clearInterval(timer);
+      if (initialData) {
+        setFormData({
+          vehicleNumber: initialData.vehicleNo || initialData.vehicle || "",
+          carModel: initialData.model || "",
+          customerName: initialData.customer || "",
+          phone: initialData.phone || "",
+          service: initialData.service || "PPF Full Body",
+          technician: initialData.technician || initialData.technicianIn || "Arjun",
+          odometer: initialData.odometer || "",
+          inTime: initialData.inTime || "",
+          notes: initialData.notes || "",
+        });
+      } else {
+        setFormData({
+          vehicleNumber: "",
+          carModel: "",
+          customerName: "",
+          phone: "",
+          service: "PPF Full Body",
+          technician: "Arjun",
+          odometer: "",
+          inTime: "",
+          notes: "",
+        });
+        updateCurrentTime();
+        const timer = setInterval(updateCurrentTime, 1000);
+        return () => clearInterval(timer);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -70,12 +109,24 @@ export default function CarCheckInDialog({
     }
   };
 
+  const handleAddTechnician = (technicianData: {
+    name: string;
+    phone: string;
+    experience: string;
+    specialization: string;
+  }) => {
+    if (!technicians.includes(technicianData.name)) {
+      setTechnicians((prev) => [...prev, technicianData.name]);
+      setFormData((prev) => ({ ...prev, technician: technicianData.name }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (onSubmit) {
       onSubmit({
-        id: Date.now().toString(),
-        entryId: `IN-${String(Math.floor(Math.random() * 1000)).padStart(4, "0")}`,
+        id: initialData?.id || Date.now().toString(),
+        entryId: initialData?.entryId || `IN-${String(Math.floor(Math.random() * 1000)).padStart(4, "0")}`,
         vehicleNo: formData.vehicleNumber,
         vehicle: formData.vehicleNumber,
         model: formData.carModel,
@@ -85,22 +136,11 @@ export default function CarCheckInDialog({
         technician: formData.technician,
         technicianIn: formData.technician,
         inTime: formData.inTime || new Date().toISOString(),
-        status: "Ongoing",
+        status: initialData?.status || "Ongoing",
         notes: formData.notes,
         odometer: formData.odometer,
       });
     }
-    setFormData({
-      vehicleNumber: "",
-      carModel: "",
-      customerName: "",
-      phone: "",
-      service: "PPF Full Body",
-      technician: "Arjun",
-      odometer: "",
-      inTime: "",
-      notes: "",
-    });
     onClose();
   };
 
@@ -112,7 +152,7 @@ export default function CarCheckInDialog({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Car className="w-6 h-6 text-yellow-500" />
-            <h2 className="text-2xl font-bold text-gray-900">Car Check-In</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{initialData ? "Edit Car Entry" : "Car Check-In"}</h2>
           </div>
          
           <button
@@ -183,6 +223,13 @@ export default function CarCheckInDialog({
                 onChange={handleChange}
                 placeholder="+91 XXXXX XXXXX"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                minLength={10}
+                maxLength={10}
+                pattern="[0-9]{10}"
+                onInvalid={(e) => {
+                  e.preventDefault();
+                  toast.error("Phone number must be exactly 10 digits");
+                }}
               />
             </div>
           </div>
@@ -210,17 +257,26 @@ export default function CarCheckInDialog({
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Technician
               </label>
-              <select
-                name="technician"
-                value={formData.technician}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white"
-              >
-                <option>Arjun</option>
-                <option>Sathish</option>
-                <option>Kumar</option>
-                <option>Rajesh</option>
-              </select>
+              <div className="flex gap-2">
+                <select
+                  name="technician"
+                  value={formData.technician}
+                  onChange={handleChange}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white"
+                >
+                  {technicians.map((tech) => (
+                    <option key={tech}>{tech}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setIsAddTechnicianOpen(true)}
+                  className="px-4 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition-colors flex items-center gap-2"
+                  title="Add new technician"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -279,6 +335,12 @@ export default function CarCheckInDialog({
           </button>
         </form>
       </div>
+
+      <AddTechnicianDialog
+        isOpen={isAddTechnicianOpen}
+        onClose={() => setIsAddTechnicianOpen(false)}
+        onSubmit={handleAddTechnician}
+      />
     </div>
   );
 }

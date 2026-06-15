@@ -1,10 +1,11 @@
 "use client";
 /* eslint-disable react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any */
 
-import { X, Check } from "lucide-react";
+import { X, Check, ClipboardList } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface JobData {
+  id?: string;
   vehicle: string;
   customer: string;
   service: string;
@@ -21,10 +22,13 @@ interface NewJobCardDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSave?: (data: JobData) => void;
+  initialData?: JobData | null;
 }
 
-export default function NewJobCardDialog({ isOpen, onClose, onSave }: NewJobCardDialogProps) {
+export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData }: NewJobCardDialogProps) {
   const [mounted, setMounted] = useState(false);
+  const isEditing = !!initialData?.id;
+
   const [formData, setFormData] = useState<JobData>({
     vehicle: "",
     customer: "",
@@ -44,26 +48,36 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave }: NewJobCard
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        vehicle: "",
-        customer: "",
-        service: "PPF Full Body",
-        technician: "Arjun",
-        priority: "Normal",
-        status: "Pending",
-        startDate: new Date().toISOString().split("T")[0],
-        estCompletion: "",
-        actualCompletion: "",
-        notes: "",
-      });
+      if (initialData) {
+        setFormData(initialData);
+      } else {
+        setFormData({
+          vehicle: "",
+          customer: "",
+          service: "PPF Full Body",
+          technician: "Arjun",
+          priority: "Normal",
+          status: "Pending",
+          startDate: new Date().toISOString().split("T")[0],
+          estCompletion: "",
+          actualCompletion: "",
+          notes: "",
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   if (!mounted || !isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSave) onSave(formData);
+    if (onSave) {
+      const dataToSave = {
+        ...formData,
+        ...(isEditing && { id: formData.id })
+      };
+      onSave(dataToSave);
+    }
     onClose();
   };
 
@@ -79,7 +93,8 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave }: NewJobCard
       <div className="relative bg-white rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl">
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <span className="text-[#f59e0b] text-2xl">📋</span> New Job Card
+            <ClipboardList className="w-6 h-6 text-[#f59e0b]" />
+            {isEditing ? `Edit Job Card - ${formData.vehicle}` : "New Job Card"}
           </h2>
           <button 
             onClick={onClose}
@@ -198,11 +213,11 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave }: NewJobCard
             </div>
           </div>
           
-          <button 
+          <button
             type="submit"
             className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
           >
-            <Check className="w-5 h-5 stroke-3" /> Create Job Card
+            <Check className="w-5 h-5 stroke-3" /> {isEditing ? "Update Job Card" : "Create Job Card"}
           </button>
         </form>
       </div>

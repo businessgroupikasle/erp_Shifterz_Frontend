@@ -186,6 +186,13 @@ export async function createCarIn(carIn: any) {
   });
 }
 
+export async function editCarIn(id: string, carIn: any) {
+  return apiCall(`/carin/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(carIn),
+  });
+}
+
 export async function updateCarIn(id: string, carIn: any) {
   return apiCall(`/carin/${id}/checkout`, {
     method: "PUT",
@@ -301,5 +308,12 @@ export async function deleteFranchise(id: string) {
 // ═══════════════════════════════════════════════════════════════
 export async function getReports() {
   return apiCall("/reports");
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VEHICLE LOOKUP
+// ═══════════════════════════════════════════════════════════════
+export async function fetchVehicleDetails(vehicleNo: string) {
+  return apiCall(`/vehicle/${vehicleNo}`);
 }
 

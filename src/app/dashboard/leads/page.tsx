@@ -1,10 +1,12 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState, useEffect } from "react";
-import { Plus, ChevronDown, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, ChevronDown, Trash2, Pencil } from "lucide-react";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
-import { getLeads, createLead, deleteLead } from "@/lib/api";
+import EditLeadDialog from "@/components/leads/EditLeadDialog";
+import { getLeads, createLead, deleteLead, updateLead, createCustomer } from "@/lib/api";
+import { toast } from "react-hot-toast";
 
 interface Lead {
   id: string;
@@ -20,6 +22,95 @@ interface Lead {
   status: string;
 }
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "New":
+      return "bg-blue-100 text-blue-700";
+    case "Follow Up":
+      return "bg-yellow-100 text-yellow-700";
+    case "Converted":
+      return "bg-green-100 text-green-700";
+    case "Lost":
+      return "bg-red-100 text-red-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+const getSourceColor = (source: string) => {
+  switch (source) {
+    case "JustDial":
+      return "bg-blue-100 text-blue-700";
+    case "Instagram":
+      return "bg-purple-100 text-purple-700";
+    case "Referral":
+      return "bg-green-100 text-green-700";
+    case "Facebook":
+      return "bg-blue-100 text-blue-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+const StatusDropdown = ({ lead, handleStatusChange }: { lead: Lead, handleStatusChange: (id: string, newStatus: string, lead: Lead) => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const statuses = ["New", "Follow Up", "Converted", "Lost"];
+
+  const getDotColor = (status: string) => {
+    switch (status) {
+      case "New": return "bg-blue-500";
+      case "Follow Up": return "bg-yellow-500";
+      case "Converted": return "bg-green-500";
+      case "Lost": return "bg-red-500";
+      default: return "bg-gray-500";
+    }
+  };
+
+  return (
+    <div className="relative inline-block text-left" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between w-[105px] transition-all shadow-sm border border-transparent hover:border-gray-200 ${getStatusColor(lead.status)}`}
+      >
+        <span>{lead.status}</span>
+        <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute z-50 mt-2 w-36 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] bg-white border border-gray-100 py-1.5 overflow-hidden -left-2 animate-in fade-in slide-in-from-top-2 duration-150">
+          {statuses.map((status) => (
+            <button
+              key={status}
+              onClick={() => {
+                handleStatusChange(lead.id, status, lead);
+                setIsOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-gray-50 transition-colors flex items-center gap-2.5 ${
+                status === lead.status ? "bg-gray-50 text-gray-900" : "text-gray-600"
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full shadow-sm ${getDotColor(status)}`} />
+              {status}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +118,8 @@ export default function LeadsPage() {
   const [filter, setFilter] = useState("All");
   const [sourceFilter, setSourceFilter] = useState("All Sources");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [leadToEdit, setLeadToEdit] = useState<Lead | null>(null);
 
   // Load leads from backend
   useEffect(() => {
@@ -69,6 +162,64 @@ export default function LeadsPage() {
     }
   };
 
+  // Edit lead
+  const handleEditLead = async (id: string, updatedLead: any) => {
+    try {
+      const currentLead = leads.find(l => l.id === id);
+      const updated = await updateLead(id, updatedLead);
+      setLeads(leads.map(lead => lead.id === id ? updated : lead));
+
+      if (currentLead && currentLead.status !== "Converted" && updatedLead.status === "Converted") {
+        try {
+          await createCustomer({
+            name: updatedLead.name,
+            phone: updatedLead.phone,
+            email: updatedLead.email || "",
+            address: "",
+            type: "Retail",
+            source: updatedLead.source,
+            status: "Active"
+          });
+          toast.success("Lead converted! Customer profile created successfully.");
+        } catch (err: any) {
+          toast.error("Lead converted, but failed to create customer: " + err.message);
+        }
+      }
+    } catch (err: any) {
+      alert("Failed to update lead: " + err.message);
+      console.error(err);
+    }
+  };
+
+  // Change Status
+  const handleStatusChange = async (id: string, newStatus: string, currentLead: Lead) => {
+    try {
+      const updatedLead = { ...currentLead, status: newStatus };
+      const updated = await updateLead(id, updatedLead);
+      setLeads(leads.map(lead => lead.id === id ? updated : lead));
+
+      if (newStatus === "Converted" && currentLead.status !== "Converted") {
+        try {
+          await createCustomer({
+            name: currentLead.name,
+            phone: currentLead.phone,
+            email: currentLead.email || "",
+            address: "",
+            type: "Retail",
+            source: currentLead.source,
+            status: "Active"
+          });
+          toast.success("Lead converted! Customer profile created successfully.");
+        } catch (err: any) {
+          toast.error("Lead converted, but failed to create customer: " + err.message);
+        }
+      }
+    } catch (err: any) {
+      alert("Failed to update status: " + err.message);
+      console.error(err);
+    }
+  };
+
   const filteredLeads = leads.filter((lead) => {
     const statusMatch = filter === "All" || lead.status === filter;
     const sourceMatch =
@@ -79,37 +230,9 @@ export default function LeadsPage() {
   const totalLeads = leads.length;
   const newLeads = leads.filter((l) => l.status === "New").length;
   const followUp = leads.filter((l) => l.status === "Follow Up").length;
-  const closed = leads.filter((l) => l.status === "Closed").length;
+  const closed = leads.filter((l) => l.status === "Converted").length;
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "New":
-        return "bg-blue-100 text-blue-700";
-      case "Follow Up":
-        return "bg-yellow-100 text-yellow-700";
-      case "Closed":
-        return "bg-green-100 text-green-700";
-      case "Lost":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
-
-  const getSourceColor = (source: string) => {
-    switch (source) {
-      case "JustDial":
-        return "bg-blue-100 text-blue-700";
-      case "Instagram":
-        return "bg-purple-100 text-purple-700";
-      case "Referral":
-        return "bg-green-100 text-green-700";
-      case "Facebook":
-        return "bg-blue-100 text-blue-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
+  // Color helper functions have been hoisted
 
   return (
     <div className="p-8">
@@ -147,7 +270,7 @@ export default function LeadsPage() {
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-            Closed
+            Converted
           </p>
           <p className="text-4xl font-bold text-gray-900">{closed}</p>
         </div>
@@ -156,7 +279,7 @@ export default function LeadsPage() {
       {/* Filters */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex gap-2">
-          {["All", "New", "Follow Up", "Closed", "Lost"].map((tab) => (
+          {["All", "New", "Follow Up", "Converted", "Lost"].map((tab) => (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
@@ -228,14 +351,23 @@ export default function LeadsPage() {
                   <td className="px-6 py-4 text-sm text-gray-700">{lead.service}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{lead.vehicle}</td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`px-2.5 py-1 rounded text-xs font-semibold ${getStatusColor(lead.status)}`}>
-                      {lead.status}
-                    </span>
+                    <StatusDropdown lead={lead} handleStatusChange={handleStatusChange} />
                   </td>
-                  <td className="px-6 py-4 text-sm">
+                  <td className="px-6 py-4 text-sm flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setLeadToEdit(lead);
+                        setIsEditDialogOpen(true);
+                      }}
+                      className="p-1 hover:bg-blue-100 rounded transition-colors"
+                      title="Edit Lead"
+                    >
+                      <Pencil className="w-4 h-4 text-blue-600" />
+                    </button>
                     <button
                       onClick={() => handleDeleteLead(lead.id)}
                       className="p-1 hover:bg-red-100 rounded transition-colors"
+                      title="Delete Lead"
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />
                     </button>
@@ -252,6 +384,15 @@ export default function LeadsPage() {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSubmit={handleAddLead}
+      />
+      <EditLeadDialog
+        isOpen={isEditDialogOpen}
+        onClose={() => {
+          setIsEditDialogOpen(false);
+          setLeadToEdit(null);
+        }}
+        onSubmit={handleEditLead}
+        lead={leadToEdit}
       />
     </div>
   );

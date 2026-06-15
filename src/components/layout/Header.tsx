@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { Bell, Settings, User, LogOut, Clock } from "lucide-react";
+import { getSettings } from "@/lib/api";
 
 const pageHeaders: Record<string, { title: string; description: string }> = {
   "/dashboard": {
@@ -72,12 +74,35 @@ function getCurrentTime(): string {
 export default function Header() {
   const pathname = usePathname();
   const [currentTime, setCurrentTime] = useState<string>("");
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [companyInitials, setCompanyInitials] = useState("AD");
 
   useEffect(() => {
     setCurrentTime(getCurrentTime());
     const timer = setInterval(() => {
       setCurrentTime(getCurrentTime());
     }, 1000);
+
+    async function loadCompany() {
+      try {
+        const data = await getSettings();
+        const companyName = data?.companyInfo?.name || data?.companyName;
+        if (companyName) {
+          const words = companyName.trim().split(/\s+/);
+          if (words.length > 1) {
+            setCompanyInitials((words[0][0] + words[1][0]).toUpperCase());
+          } else if (words[0].length >= 2) {
+            setCompanyInitials(words[0].substring(0, 2).toUpperCase());
+          } else {
+            setCompanyInitials(words[0].toUpperCase());
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load company info for header", err);
+      }
+    }
+    loadCompany();
+
     return () => clearInterval(timer);
   }, []);
 
@@ -100,27 +125,41 @@ export default function Header() {
             <Clock className="w-4 h-4 text-gray-600" />
             <span className="text-sm font-semibold text-gray-700">{currentTime}</span>
           </div>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Bell className="w-5 h-5 text-gray-600" />
-          </button>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Settings className="w-5 h-5 text-gray-600" />
-          </button>
-          <button 
-            onClick={() => {
-              localStorage.removeItem("token");
-              localStorage.removeItem("user");
-              sessionStorage.clear();
-              document.cookie = "token=; path=/; max-age=0";
-              window.location.href = '/login';
-            }}
-            className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-500" 
-            title="Logout"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
-          <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-gray-900 ml-2">
-            AD
+          <div className="relative">
+            <button 
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              onBlur={() => setTimeout(() => setIsProfileOpen(false), 200)}
+              className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-gray-900 ml-2 hover:ring-2 hover:ring-yellow-500 hover:ring-offset-2 transition-all focus:outline-none"
+            >
+              {companyInitials}
+            </button>
+            
+            {isProfileOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                <Link 
+                  href="/dashboard/settings"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left transition-colors"
+                  onClick={() => setIsProfileOpen(false)}
+                >
+                  <User className="w-4 h-4" />
+                  Profile
+                </Link>
+                <div className="h-px bg-gray-100 my-1"></div>
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+                    sessionStorage.clear();
+                    document.cookie = "token=; path=/; max-age=0";
+                    window.location.href = '/login';
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

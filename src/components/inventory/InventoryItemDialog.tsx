@@ -1,7 +1,8 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getSettings } from "@/lib/api";
 import { X, Package } from "lucide-react";
 
 interface InventoryItemDialogProps {
@@ -15,6 +16,7 @@ export default function InventoryItemDialog({
   onClose,
   onSubmit,
 }: InventoryItemDialogProps) {
+  const [categories, setCategories] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     category: "PPF",
@@ -25,6 +27,22 @@ export default function InventoryItemDialog({
     supplier: "",
     location: "",
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      getSettings()
+        .then((data) => {
+          if (data?.categories) {
+            setCategories(data.categories);
+            setFormData((prev) => ({
+              ...prev,
+              category: data.categories.length > 0 ? data.categories[0] : "PPF",
+            }));
+          }
+        })
+        .catch(console.error);
+    }
+  }, [isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -107,10 +125,18 @@ export default function InventoryItemDialog({
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               >
-                <option>PPF</option>
-                <option>Coating</option>
-                <option>Consumable</option>
-                <option>Chemical</option>
+                {categories.length > 0 ? (
+                  categories.map((cat, i) => (
+                    <option key={i} value={cat}>{cat}</option>
+                  ))
+                ) : (
+                  <>
+                    <option>PPF</option>
+                    <option>Coating</option>
+                    <option>Consumable</option>
+                    <option>Chemical</option>
+                  </>
+                )}
               </select>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import Image from "next/image";
-import { Eye, EyeOff, Info } from "lucide-react";
+import { Eye, EyeOff, Info, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -65,7 +65,7 @@ export default function LoginPage() {
               <Image src="/logo.svg" alt="Shifterz Logo" width={180} height={50} className="h-14 w-auto object-contain" priority />
             </div>
             <h1 className="text-4xl font-black text-yellow-500 font-['Outfit'] tracking-wide mb-1">SHIFTERZ</h1>
-            <p className="text-gray-400 text-sm font-medium tracking-wide">Professional Car Care Management</p>
+            <p className="text-gray-400 text-sm font-medium tracking-wide">Mutli-level Super-pro Detailing Network</p>
           </div>
 
           {/* Error Message */}
@@ -125,7 +125,7 @@ export default function LoginPage() {
             >
               {isLoading ? (
                 <>
-                  <span className="inline-block animate-spin">⏳</span>
+                  <Loader2 className="animate-spin w-5 h-5" />
                   Logging in...
                 </>
               ) : (
@@ -138,7 +138,7 @@ export default function LoginPage() {
           </form>
 
           {/* Demo Credentials Info */}
-          <div className="mt-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+          {/* <div className="mt-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
             <p className="text-xs text-yellow-500 mb-3 font-semibold flex items-center gap-2">
               <Info className="w-4 h-4" /> Demo Credentials:
             </p>
@@ -152,24 +152,14 @@ export default function LoginPage() {
                 <span className="font-mono text-white bg-white/10 border border-white/20 px-2.5 py-1 rounded-md shadow-inner tracking-wider">admin123</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Footer */}
           <div className="mt-8 pt-6 border-t border-gray-800 text-center">
-            <p className="text-xs text-gray-500">
-              Shifterz Pro Suite v1.0
-            </p>
             <p className="text-xs text-gray-600 mt-1">
-              © 2026 Shifterz. All rights reserved.
+              © {new Date().getFullYear()} Ikasle Business Group. All rights reserved.
             </p>
           </div>
-        </div>
-
-        {/* Connection Status */}
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-400 opacity-70">
-            🔗 Connecting to backend at localhost:5000
-          </p>
         </div>
       </div>
 
