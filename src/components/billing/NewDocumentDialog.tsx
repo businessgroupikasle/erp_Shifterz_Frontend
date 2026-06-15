@@ -50,6 +50,8 @@ export default function NewDocumentDialog({
     const { name, value } = e.target;
     if (name === "phone") {
       setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
+    } else if (name === "vehicle") {
+      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -73,21 +75,19 @@ export default function NewDocumentDialog({
       const docNo = `${docTypePrefix}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
 
       const newDoc = {
-        id: Date.now().toString(),
-        docNo,
         type: formData.type,
         client: formData.client,
         phone: formData.phone,
         vehicle: formData.vehicle,
         service: formData.service,
-        base: `₹${formData.amount}`,
-        gst: `₹${formData.gst}`,
-        discount: formData.discount ? `₹${formData.discount}` : "—",
-        total: `₹${total.toFixed(0)}`,
+        amount: baseAmount,
+        gst: gstAmount,
+        discount: discountAmount,
         date: formData.invoiceDate,
-        due: formData.dueDate,
+        dueDate: formData.dueDate || formData.invoiceDate,
         status: formData.status,
-        gstNumber: formData.gstNumber,
+        notes: formData.notes,
+        gstNumber: formData.gstNumber || null,
       };
       onSubmit(newDoc);
     }
@@ -138,7 +138,7 @@ export default function NewDocumentDialog({
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               >
                 <option>Invoice</option>
@@ -155,7 +155,7 @@ export default function NewDocumentDialog({
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               >
                 <option>Pending</option>
                 <option>Paid</option>
@@ -177,7 +177,7 @@ export default function NewDocumentDialog({
                 value={formData.client}
                 onChange={handleChange}
                 placeholder="Full name"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -191,7 +191,7 @@ export default function NewDocumentDialog({
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+91"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
           </div>
@@ -208,7 +208,7 @@ export default function NewDocumentDialog({
                 value={formData.vehicle}
                 onChange={handleChange}
                 placeholder="TN 04 XX 0000"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900 uppercase"
               />
             </div>
             <div>
@@ -219,7 +219,7 @@ export default function NewDocumentDialog({
                 name="service"
                 value={formData.service}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               >
                 <option>PPF Full Body</option>
                 <option>PPF Bonnet + Roof</option>
@@ -247,7 +247,7 @@ export default function NewDocumentDialog({
                 value={formData.amount}
                 onChange={handleChange}
                 placeholder="0"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -277,7 +277,7 @@ export default function NewDocumentDialog({
                 value={formData.discount}
                 onChange={handleChange}
                 placeholder="0"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
             <div>
@@ -289,7 +289,7 @@ export default function NewDocumentDialog({
                 name="invoiceDate"
                 value={formData.invoiceDate}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
           </div>
@@ -305,7 +305,7 @@ export default function NewDocumentDialog({
                 name="dueDate"
                 value={formData.dueDate}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
             <div>
@@ -318,7 +318,7 @@ export default function NewDocumentDialog({
                 value={formData.gstNumber}
                 onChange={handleChange}
                 placeholder="Ex: 33AAAAA0000A1Z5"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 uppercase"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900 uppercase"
               />
             </div>
           </div>
@@ -334,7 +334,7 @@ export default function NewDocumentDialog({
               onChange={handleChange}
               placeholder="Payment terms, warranty info..."
               rows={3}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 resize-none"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 resize-none text-gray-900"
             />
           </div>
 

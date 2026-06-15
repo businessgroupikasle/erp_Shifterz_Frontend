@@ -97,7 +97,7 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave }: NewJobCard
                 required
                 type="text" 
                 value={formData.vehicle}
-                onChange={e => setFormData({...formData, vehicle: e.target.value})}
+                onChange={e => setFormData({...formData, vehicle: e.target.value.toUpperCase()})}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors uppercase"
                 placeholder="TN 04 XX 0000"
               />

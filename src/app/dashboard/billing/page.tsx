@@ -285,7 +285,7 @@ export default function BillingPage() {
           service: selectedDocument.service,
           base: (selectedDocument.amount || 0).toString(),
           gst: (selectedDocument.gst || 0).toString(),
-          total: (selectedDocument.total || 0).toString(),
+          total: ((selectedDocument.amount || 0) + (selectedDocument.gst || 0) - (selectedDocument.discount || 0)).toString(),
           date: selectedDocument.date,
           due: selectedDocument.dueDate,
           gstNumber: selectedDocument.gstNumber
