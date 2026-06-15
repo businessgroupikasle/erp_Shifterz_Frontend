@@ -23,6 +23,11 @@ interface BillingDocument {
   status: string;
   notes: string;
   gstNumber?: string;
+  items?: any;
+  bankDetails?: string;
+  paymentTerms?: string;
+  deliveryTerms?: string;
+  authorizedSignatory?: string;
 }
 
 export default function BillingPage() {
@@ -288,7 +293,12 @@ export default function BillingPage() {
           total: ((selectedDocument.amount || 0) + (selectedDocument.gst || 0) - (selectedDocument.discount || 0)).toString(),
           date: selectedDocument.date,
           due: selectedDocument.dueDate,
-          gstNumber: selectedDocument.gstNumber
+          gstNumber: selectedDocument.gstNumber,
+          items: selectedDocument.items,
+          bankDetails: selectedDocument.bankDetails,
+          paymentTerms: selectedDocument.paymentTerms,
+          deliveryTerms: selectedDocument.deliveryTerms,
+          authorizedSignatory: selectedDocument.authorizedSignatory
         } : undefined}
       />
     </div>

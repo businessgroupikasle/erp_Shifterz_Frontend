@@ -136,9 +136,9 @@ export default function JobCardsPage() {
                       {j.priority}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{j.start}</td>
+                  <td className="px-6 py-4 text-gray-600">{j.startDate}</td>
                   <td className="px-6 py-4 text-gray-600">{j.estCompletion}</td>
-                  <td className="px-6 py-4 text-gray-600">{j.actual}</td>
+                  <td className="px-6 py-4 text-gray-600">{j.actualCompletion}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${j.status === 'Completed' ? 'bg-green-50 text-green-600' : j.status === 'Pending' ? 'bg-gray-100 text-gray-600' : 'bg-blue-50 text-blue-600'}`}>
                       {j.status}

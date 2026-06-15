@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Car } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Car, Clock, Calendar } from "lucide-react";
 
 interface CarCheckInDialogProps {
   isOpen: boolean;
@@ -25,6 +25,35 @@ export default function CarCheckInDialog({
     inTime: "",
     notes: "",
   });
+
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const [displayTime, setDisplayTime] = useState<string>("");
+
+  const updateCurrentTime = () => {
+    const now = new Date();
+    const month = (now.getMonth() + 1).toString().padStart(2, "0");
+    const day = now.getDate().toString().padStart(2, "0");
+    const year = now.getFullYear();
+    const hours = now.getHours().toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    const seconds = now.getSeconds().toString().padStart(2, "0");
+    const ampm = now.getHours() >= 12 ? "PM" : "AM";
+
+    const headerTime = `${hours}:${minutes}:${seconds} ${ampm}`;
+    const fieldTime = `${month}/${day}/${year} ${hours}:${minutes} ${ampm}`;
+
+    setCurrentTime(headerTime);
+    setDisplayTime(fieldTime);
+    setFormData((prev) => ({ ...prev, inTime: fieldTime }));
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updateCurrentTime();
+      const timer = setInterval(updateCurrentTime, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -85,6 +114,7 @@ export default function CarCheckInDialog({
             <Car className="w-6 h-6 text-yellow-500" />
             <h2 className="text-2xl font-bold text-gray-900">Car Check-In</h2>
           </div>
+         
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
@@ -213,13 +243,15 @@ export default function CarCheckInDialog({
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 In Time
               </label>
-              <input
-                type="datetime-local"
-                name="inTime"
-                value={formData.inTime}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={displayTime}
+                  readOnly
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-default"
+                />
+                <Calendar className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
+              </div>
             </div>
           </div>
 
