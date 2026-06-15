@@ -65,8 +65,8 @@ export default function FranchisePage() {
 
   const totalFranchises = franchises.length;
   const activeFranchises = franchises.filter(f => f.status === "Active").length;
-  const combinedRevenue = franchises.reduce((acc, f) => acc + f.revenue, 0);
-  const totalRoyalty = franchises.reduce((acc, f) => acc + f.royaltyDue, 0);
+  const combinedRevenue = franchises.reduce((acc, f) => acc + (f.revenue || 0), 0);
+  const totalRoyalty = franchises.reduce((acc, f) => acc + (f.royaltyDue || 0), 0);
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Loading franchises...</div>;
@@ -139,9 +139,9 @@ export default function FranchisePage() {
                   <td className="px-6 py-4 text-gray-600 font-mono text-xs">{f.phone}</td>
                   <td className="px-6 py-4 text-gray-500 text-xs">{f.startDate}</td>
                   <td className="px-6 py-4 font-bold text-gray-900 text-center">{f.jobs}</td>
-                  <td className="px-6 py-4 font-bold text-yellow-500">₹{f.revenue.toLocaleString("en-IN")}</td>
-                  <td className="px-6 py-4 text-gray-600 text-center">{f.royalty}%</td>
-                  <td className="px-6 py-4 font-bold text-green-500">₹{f.royaltyDue.toLocaleString("en-IN")}</td>
+                  <td className="px-6 py-4 font-bold text-yellow-500">₹{(f.revenue || 0).toLocaleString("en-IN")}</td>
+                  <td className="px-6 py-4 text-gray-600 text-center">{f.royalty || 0}%</td>
+                  <td className="px-6 py-4 font-bold text-green-500">₹{(f.royaltyDue || 0).toLocaleString("en-IN")}</td>
                   <td className="px-6 py-4">
                     <span className={`text-[11px] font-bold ${f.status === 'Active' ? 'text-green-500' : 'text-yellow-500'}`}>
                       {f.status}
@@ -164,12 +164,12 @@ export default function FranchisePage() {
           <h3 className="font-bold text-gray-900 mb-6 text-sm">Revenue Distribution</h3>
           <div className="space-y-5">
             {franchises.map(f => {
-              const percentage = Math.round((f.revenue / combinedRevenue) * 100) || 0;
+              const percentage = Math.round(((f.revenue || 0) / combinedRevenue) * 100) || 0;
               return (
                 <div key={f.id} className="space-y-1">
                   <div className="flex justify-between text-xs">
                     <span className="font-semibold text-gray-700">{f.city}</span>
-                    <span className="text-gray-400">{percentage}% · ₹{f.revenue.toLocaleString("en-IN")}</span>
+                    <span className="text-gray-400">{percentage}% · ₹{(f.revenue || 0).toLocaleString("en-IN")}</span>
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                     <div className="bg-yellow-500 h-1.5 rounded-full" style={{ width: `${percentage}%` }}></div>
@@ -189,7 +189,7 @@ export default function FranchisePage() {
                   <div className="font-bold text-gray-900 text-xs">{f.city}</div>
                   <div className="text-[10px] text-gray-400 mt-0.5">{f.jobs} jobs · {f.royalty}% royalty</div>
                 </div>
-                <div className="font-bold text-green-500 text-sm">₹{f.royaltyDue.toLocaleString("en-IN")}</div>
+                <div className="font-bold text-green-500 text-sm">₹{(f.royaltyDue || 0).toLocaleString("en-IN")}</div>
               </div>
             ))}
             <div className="flex justify-between items-center pt-4 mt-2 border-t border-gray-100">
