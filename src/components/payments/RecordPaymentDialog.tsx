@@ -43,18 +43,13 @@ export default function RecordPaymentDialog({
 
     if (onSubmit) {
       const newPayment = {
-        id: `PAY${String(Math.floor(Math.random() * 100000)).padStart(5, "0")}`,
-        invoiceRef: formData.invoiceNo || "—",
+        invoiceId: formData.invoiceNo,
         client: formData.client,
-        amount: `₹${parseFloat(formData.amount).toLocaleString("en-IN")}`,
+        amount: Number(formData.amount),
         mode: formData.mode,
-        date: new Date(formData.date).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-        reference: formData.reference || "—",
-        notes: formData.notes || "—",
+        date: formData.date,
+        ref: formData.reference,
+        notes: formData.notes,
       };
       onSubmit(newPayment);
     }
@@ -105,7 +100,7 @@ export default function RecordPaymentDialog({
                 value={formData.client}
                 onChange={handleChange}
                 placeholder="Full name"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -119,7 +114,7 @@ export default function RecordPaymentDialog({
                 value={formData.invoiceNo}
                 onChange={handleChange}
                 placeholder="INV-XXXX"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
           </div>
@@ -136,7 +131,7 @@ export default function RecordPaymentDialog({
                 value={formData.amount}
                 onChange={handleChange}
                 placeholder="0"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -148,7 +143,7 @@ export default function RecordPaymentDialog({
                 name="mode"
                 value={formData.mode}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               >
                 <option>UPI</option>
                 <option>Cash</option>
@@ -170,7 +165,7 @@ export default function RecordPaymentDialog({
                 name="date"
                 value={formData.date}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
             <div>
@@ -183,7 +178,7 @@ export default function RecordPaymentDialog({
                 value={formData.reference}
                 onChange={handleChange}
                 placeholder="UPI ref / cheque no."
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
           </div>
@@ -199,7 +194,7 @@ export default function RecordPaymentDialog({
               onChange={handleChange}
               placeholder="Partial payment, advance, etc."
               rows={3}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 resize-none"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 resize-none text-gray-900"
             />
           </div>
 

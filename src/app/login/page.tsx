@@ -36,7 +36,7 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       setError(err.message || "Invalid username or password");
-      console.error("Login error:", err);
+      console.warn("Login error:", err.message || err);
     } finally {
       setIsLoading(false);
     }

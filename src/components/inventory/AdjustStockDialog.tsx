@@ -86,7 +86,7 @@ export default function AdjustStockDialog({
               name="type"
               value={formData.type}
               onChange={handleChange}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
             >
               <option>Add Stock (Purchase)</option>
               <option>Remove Stock (Usage)</option>
@@ -104,7 +104,7 @@ export default function AdjustStockDialog({
               value={formData.quantity}
               onChange={handleChange}
               placeholder="0"
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               required
             />
           </div>
@@ -120,7 +120,7 @@ export default function AdjustStockDialog({
               value={formData.reason}
               onChange={handleChange}
               placeholder="Purchase / Damaged / Used in job"
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
             />
           </div>
 

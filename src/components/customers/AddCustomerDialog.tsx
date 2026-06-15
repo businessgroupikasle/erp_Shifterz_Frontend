@@ -29,6 +29,8 @@ export default function AddCustomerDialog({
     const { name, value } = e.target;
     if (name === "phone") {
       setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
+    } else if (name === "vehicle") {
+      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -133,7 +135,7 @@ export default function AddCustomerDialog({
                 value={formData.vehicle}
                 onChange={handleChange}
                 placeholder="TN 04 XX 0000"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 uppercase"
               />
             </div>
           </div>

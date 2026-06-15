@@ -93,7 +93,7 @@ export default function InventoryItemDialog({
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="XPEL PPF Film"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -105,7 +105,7 @@ export default function InventoryItemDialog({
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               >
                 <option>PPF</option>
                 <option>Coating</option>
@@ -127,7 +127,7 @@ export default function InventoryItemDialog({
                 value={formData.unit}
                 onChange={handleChange}
                 placeholder="Meter / Bottle / Kit"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
             <div>
@@ -140,7 +140,7 @@ export default function InventoryItemDialog({
                 value={formData.stock}
                 onChange={handleChange}
                 placeholder="0"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -158,7 +158,7 @@ export default function InventoryItemDialog({
                 value={formData.costPerUnit}
                 onChange={handleChange}
                 placeholder="0"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -172,7 +172,7 @@ export default function InventoryItemDialog({
                 value={formData.reorderLevel}
                 onChange={handleChange}
                 placeholder="5"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
           </div>
@@ -189,7 +189,7 @@ export default function InventoryItemDialog({
                 value={formData.supplier}
                 onChange={handleChange}
                 placeholder="Supplier name"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
             <div>
@@ -202,7 +202,7 @@ export default function InventoryItemDialog({
                 value={formData.location}
                 onChange={handleChange}
                 placeholder="Rack A1"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
           </div>

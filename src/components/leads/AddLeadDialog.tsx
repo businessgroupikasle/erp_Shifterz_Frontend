@@ -35,6 +35,8 @@ export default function AddLeadDialog({
     const { name, value } = e.target;
     if (name === "phone") {
       setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
+    } else if (name === "vehicle") {
+      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -108,7 +110,7 @@ export default function AddLeadDialog({
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Full name"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -122,7 +124,7 @@ export default function AddLeadDialog({
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+91 XXXXX XXXXX"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               />
             </div>
@@ -140,7 +142,7 @@ export default function AddLeadDialog({
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="email@example.com"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
             <div>
@@ -153,7 +155,7 @@ export default function AddLeadDialog({
                 value={formData.vehicle}
                 onChange={handleChange}
                 placeholder="TN 04 XX 0000"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900 uppercase"
               />
             </div>
           </div>
@@ -168,7 +170,7 @@ export default function AddLeadDialog({
                 name="source"
                 value={formData.source}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
                 required
               >
                 <option>JustDial</option>
@@ -186,7 +188,7 @@ export default function AddLeadDialog({
                 name="service"
                 value={formData.service}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               >
                 <option>PPF Full Body</option>
                 <option>PPF Bonnet + Roof</option>
@@ -212,7 +214,7 @@ export default function AddLeadDialog({
                 name="assigned"
                 value={formData.assigned}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               >
                 <option>Arjun</option>
                 <option>Sathish</option>
@@ -231,7 +233,7 @@ export default function AddLeadDialog({
                 value={formData.budget}
                 onChange={handleChange}
                 placeholder="00000"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900"
               />
             </div>
           </div>
@@ -247,7 +249,7 @@ export default function AddLeadDialog({
               onChange={handleChange}
               placeholder="Additional notes..."
               rows={3}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 resize-none"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 resize-none text-gray-900"
             />
           </div>
 
