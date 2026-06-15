@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { X, Printer } from "lucide-react";
+import { getSettings } from "@/lib/api";
 
 interface DocumentPreviewDialogProps {
   isOpen: boolean;
@@ -8,6 +10,7 @@ interface DocumentPreviewDialogProps {
   document?: {
     docNo: string;
     type: string;
+    status?: string;
     client: string;
     phone: string;
     vehicle: string;
@@ -31,18 +34,30 @@ export default function DocumentPreviewDialog({
   onClose,
   document,
 }: DocumentPreviewDialogProps) {
+  const [companyInfo, setCompanyInfo] = useState<any>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      getSettings().then(data => {
+        if (data?.companyInfo) setCompanyInfo(data.companyInfo);
+      }).catch(console.error);
+    }
+  }, [isOpen]);
+
   if (!isOpen || !document) return null;
 
   const renderItemsHtml = () => {
     if (document.items && document.items.length > 0) {
-      return document.items.map(item => `
+      return document.items.map(item => {
+        const itemAmount = item.amount || (item.qty * item.price) || 0;
+        return `
         <tr>
-          <td>${item.desc}</td>
+          <td>${item.desc || '-'}</td>
           <td style="text-align:center">${item.qty}</td>
           <td style="text-align:right">₹${Number(item.price || 0).toLocaleString("en-IN")}</td>
-          <td class="amount">₹${Number(item.amount || 0).toLocaleString("en-IN")}</td>
+          <td class="amount">₹${Number(itemAmount).toLocaleString("en-IN")}</td>
         </tr>
-      `).join("");
+      `}).join("");
     }
     return `
       <tr>
@@ -69,6 +84,8 @@ export default function DocumentPreviewDialog({
                 margin: 0;
                 padding: 20px;
                 color: #333;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               .document {
                 max-width: 800px;
@@ -217,11 +234,19 @@ export default function DocumentPreviewDialog({
               <div class="header">
                 <div class="header-left">
                   <h1>SHIFTERZ</h1>
-                  <p>42, Race Course Rd, Coimbatore - 641018</p>
+                  <p>${companyInfo?.address || '42, Race Course Rd, Coimbatore - 641018'}</p>
                 </div>
                 <div class="header-right">
                   <h2>${document.type}</h2>
                   <p>${document.docNo}</p>
+                  ${document.status ? `
+                  <p style="margin-top: 8px; font-weight: bold; text-transform: uppercase;">
+                    <span style="
+                      color: ${document.status === 'Paid' ? '#16a34a' : document.status === 'Overdue' ? '#dc2626' : document.status === 'Approved' ? '#2563eb' : '#d97706'};
+                      background: ${document.status === 'Paid' ? '#dcfce7' : document.status === 'Overdue' ? '#fee2e2' : document.status === 'Approved' ? '#dbeafe' : '#fef3c7'};
+                      padding: 4px 8px; border-radius: 4px; font-size: 11px; letter-spacing: 1px;
+                    ">${document.status}</span>
+                  </p>` : ''}
                 </div>
               </div>
 
@@ -282,9 +307,9 @@ export default function DocumentPreviewDialog({
                 </div>
 
                 <div class="footer">
-                  <p>Thank you for choosing Shifterz!</p>
-                  <p>0422-123 4567</p>
-                </div>
+                <p>Thank you for choosing Shifterz!</p>
+                <p>${companyInfo?.phone || '0422-123 4567'}</p>
+              </div>
               </div>
             </div>
           </body>
@@ -319,16 +344,28 @@ export default function DocumentPreviewDialog({
 
         {/* Scrollable Document Preview Container */}
         <div className="p-6 overflow-y-auto bg-gray-50 flex justify-center">
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm w-full max-w-[800px]">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm w-full max-w-[800px] h-fit">
             {/* Header */}
             <div className="bg-yellow-400 text-gray-900 px-8 py-6 flex justify-between items-start rounded-t-lg">
               <div>
-                <h1 className="text-3xl font-bold mb-1">SHIFTERZ</h1>
-                <p className="text-sm">42, Race Course Rd, Coimbatore - 641018</p>
+                <h1 className="text-3xl font-bold mb-1 tracking-tight">SHIFTERZ</h1>
+                <p className="text-sm font-medium">{companyInfo?.address || '42, Race Course Rd, Coimbatore - 641018'}</p>
               </div>
               <div className="text-right">
-                <h2 className="text-3xl font-bold mb-1 uppercase">{document.type}</h2>
-                <p className="text-sm">{document.docNo}</p>
+                <h2 className="text-3xl font-bold mb-1 uppercase tracking-tight">{document.type}</h2>
+                <p className="text-sm font-medium">{document.docNo}</p>
+                {document.status && (
+                  <div className="mt-2">
+                    <span className={`inline-block px-3 py-1 rounded text-xs font-bold uppercase tracking-wider ${
+                      document.status === 'Paid' ? 'bg-green-100 text-green-700' :
+                      document.status === 'Overdue' ? 'bg-red-100 text-red-700' :
+                      document.status === 'Approved' ? 'bg-blue-100 text-blue-700' :
+                      'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {document.status}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -336,135 +373,147 @@ export default function DocumentPreviewDialog({
             <div className="p-8">
               {/* Bill To & Details */}
               <div className="flex justify-between mb-8">
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                <div className="max-w-[50%]">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Bill To
                   </p>
                   <h3 className="text-lg font-bold text-gray-900 mb-1">
                     {document.client}
                   </h3>
-                  <p className="text-sm text-gray-600">{document.phone}</p>
-                  <p className="text-sm text-gray-600">{document.vehicle}</p>
+                  <p className="text-sm text-gray-600 mb-1">{document.phone}</p>
+                  <p className="text-sm text-gray-600 font-medium">{document.vehicle}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Details
                   </p>
-                  <p className="text-sm">
-                    <span className="font-semibold">Date:</span> {document.date}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-semibold">Due:</span> {document.due}
-                  </p>
-                  {document.gstNumber && (
-                    <p className="text-sm">
-                      <span className="font-semibold">Client GSTIN:</span> {document.gstNumber}
-                    </p>
-                  )}
-                  <p className="text-sm">
-                    <span className="font-semibold">Our GSTIN:</span> 33AAAAAO000A1Z5
-                  </p>
+                  <table className="text-sm ml-auto">
+                    <tbody>
+                      <tr>
+                        <td className="pr-4 text-gray-500 font-medium pb-1">Date:</td>
+                        <td className="text-gray-900 font-semibold pb-1">{document.date}</td>
+                      </tr>
+                      <tr>
+                        <td className="pr-4 text-gray-500 font-medium pb-1">Due:</td>
+                        <td className="text-gray-900 font-semibold pb-1">{document.due}</td>
+                      </tr>
+                      {document.gstNumber && (
+                        <tr>
+                          <td className="pr-4 text-gray-500 font-medium pb-1">Client GSTIN:</td>
+                          <td className="text-gray-900 font-semibold pb-1">{document.gstNumber}</td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td className="pr-4 text-gray-500 font-medium">Our GSTIN:</td>
+                        <td className="text-gray-900 font-semibold">33AAAAAO000A1Z5</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
               {/* Description Table */}
-              <table className="w-full mb-8">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wide font-semibold">
-                      Description
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs text-gray-500 uppercase tracking-wide font-semibold">
-                      Qty
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs text-gray-500 uppercase tracking-wide font-semibold">
-                      Unit Price
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs text-gray-500 uppercase tracking-wide font-semibold">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {document.items && document.items.length > 0 ? (
-                    document.items.map((item, idx) => (
-                      <tr key={idx} className="border-b border-gray-200">
-                        <td className="px-4 py-3 text-gray-900">{item.desc}</td>
-                        <td className="px-4 py-3 text-center text-gray-900">{item.qty}</td>
-                        <td className="px-4 py-3 text-right text-gray-900">₹{Number(item.price || 0).toLocaleString("en-IN")}</td>
-                        <td className="px-4 py-3 text-right text-gray-900 font-semibold">
-                          ₹{Number(item.amount || 0).toLocaleString("en-IN")}
+              <div className="border border-gray-200 rounded-lg overflow-hidden mb-8">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Qty
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Unit Price
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {document.items && document.items.length > 0 ? (
+                      document.items.map((item, idx) => {
+                        const itemAmount = item.amount || (item.qty * item.price) || 0;
+                        return (
+                        <tr key={idx} className="bg-white">
+                          <td className="px-6 py-4 text-sm text-gray-900 font-medium">{item.desc}</td>
+                          <td className="px-6 py-4 text-sm text-center text-gray-600">{item.qty}</td>
+                          <td className="px-6 py-4 text-sm text-right text-gray-600">₹{Number(item.price || 0).toLocaleString("en-IN")}</td>
+                          <td className="px-6 py-4 text-sm text-right text-gray-900 font-semibold">
+                            ₹{Number(itemAmount).toLocaleString("en-IN")}
+                          </td>
+                        </tr>
+                      )})
+                    ) : (
+                      <tr className="bg-white">
+                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">{document.service}</td>
+                        <td className="px-6 py-4 text-sm text-center text-gray-600">1</td>
+                        <td className="px-6 py-4 text-sm text-right text-gray-600">{document.base}</td>
+                        <td className="px-6 py-4 text-sm text-right text-gray-900 font-semibold">
+                          {document.base}
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr className="border-b border-gray-200">
-                      <td className="px-4 py-3 text-gray-900">{document.service}</td>
-                      <td className="px-4 py-3 text-center text-gray-900">1</td>
-                      <td className="px-4 py-3 text-right text-gray-900">{document.base}</td>
-                      <td className="px-4 py-3 text-right text-gray-900 font-semibold">
-                        {document.base}
+                    )}
+                    <tr className="bg-gray-50/50">
+                      <td colSpan={3} className="px-6 py-4 text-right text-sm text-gray-600 font-medium">Subtotal</td>
+                      <td className="px-6 py-4 text-right text-sm text-gray-900 font-bold">
+                        {document.base.includes('₹') ? document.base : `₹${document.base}`}
                       </td>
                     </tr>
-                  )}
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <td colSpan={3} className="px-4 py-3 text-right text-gray-900 font-semibold">Subtotal</td>
-                    <td className="px-4 py-3 text-right text-gray-900 font-bold">
-                      {document.base.includes('₹') ? document.base : `₹${document.base}`}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <td colSpan={3} className="px-4 py-3 text-right text-gray-900">GST (18%)</td>
-                    <td className="px-4 py-3 text-right text-gray-900 font-semibold">
-                      {document.gst.includes('₹') ? document.gst : `₹${document.gst}`}
-                    </td>
-                  </tr>
-                  <tr className="bg-yellow-100">
-                    <td colSpan={3} className="px-4 py-4 text-right font-bold text-gray-900 uppercase">
-                      Total
-                    </td>
-                    <td className="px-4 py-4 text-right font-bold text-yellow-600 text-lg">
-                      {document.total.includes('₹') ? document.total : `₹${document.total}`}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    <tr className="bg-gray-50/50">
+                      <td colSpan={3} className="px-6 py-4 text-right text-sm text-gray-600 font-medium">GST (18%)</td>
+                      <td className="px-6 py-4 text-right text-sm text-gray-900 font-semibold">
+                        {document.gst.includes('₹') ? document.gst : `₹${document.gst}`}
+                      </td>
+                    </tr>
+                    <tr className="bg-yellow-50">
+                      <td colSpan={3} className="px-6 py-5 text-right font-bold text-gray-900 uppercase tracking-wider">
+                        Total
+                      </td>
+                      <td className="px-6 py-5 text-right font-bold text-yellow-600 text-xl">
+                        {document.total.includes('₹') ? document.total : `₹${document.total}`}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
               {/* Terms & Signatory */}
-              <div className="flex justify-between mt-8 text-sm text-gray-700">
-                <div className="flex-2 pr-8 space-y-4">
+              <div className="flex justify-between mt-10 text-sm">
+                <div className="flex-[2] pr-12 space-y-6">
                   {document.paymentTerms && (
                     <div>
-                      <strong className="block text-gray-900 mb-1">Payment Terms:</strong>
-                      <p className="whitespace-pre-wrap">{document.paymentTerms}</p>
+                      <h4 className="font-bold text-gray-900 mb-2 uppercase tracking-wide text-xs">Payment Terms</h4>
+                      <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{document.paymentTerms}</p>
                     </div>
                   )}
                   {document.deliveryTerms && (
                     <div>
-                      <strong className="block text-gray-900 mb-1">Delivery Terms:</strong>
-                      <p className="whitespace-pre-wrap">{document.deliveryTerms}</p>
+                      <h4 className="font-bold text-gray-900 mb-2 uppercase tracking-wide text-xs">Delivery Terms</h4>
+                      <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{document.deliveryTerms}</p>
                     </div>
                   )}
                   {document.bankDetails && (
                     <div>
-                      <strong className="block text-gray-900 mb-1">Bank Details:</strong>
-                      <p className="whitespace-pre-wrap">{document.bankDetails}</p>
+                      <h4 className="font-bold text-gray-900 mb-2 uppercase tracking-wide text-xs">Bank Details</h4>
+                      <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{document.bankDetails}</p>
                     </div>
                   )}
                 </div>
-                <div className="flex-1 flex flex-col justify-end items-end text-right">
-                  <div className="mt-16 pt-2 border-t border-gray-800 font-bold min-w-[150px] text-center">
-                    {document.authorizedSignatory || "Authorized Signatory"}
+                <div className="flex-1 flex flex-col justify-end items-end">
+                  <div className="mt-12 text-center">
+                    <div className="w-48 border-t-2 border-gray-800 pt-2 font-bold text-gray-900">
+                      {document.authorizedSignatory || "Authorized Signatory"}
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="text-center pt-6 mt-8 border-t border-gray-200">
-                <p className="text-sm text-gray-600 mb-1">
-                  Thank you for choosing Shifterz!
-                </p>
-                <p className="text-sm text-gray-600">0422-123 4567</p>
+              <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+                <p className="text-sm text-gray-600 font-medium">Thank you for choosing Shifterz!</p>
+                <p className="text-sm text-gray-500">{companyInfo?.phone || '0422-123 4567'}</p>
               </div>
             </div>
           </div>

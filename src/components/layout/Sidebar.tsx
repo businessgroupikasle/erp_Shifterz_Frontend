@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
@@ -72,14 +73,9 @@ export default function Sidebar() {
   return (
     <aside className="w-64 bg-linear-to-b from-white to-gray-50 border-r border-gray-200 h-screen overflow-y-auto flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center font-bold text-black">
-            sz
-          </div>
-          <span className="font-bold text-gray-900">SHIFTERZ</span>
-        </div>
-        <p className="text-xs text-gray-500 ml-10">PRO SUITE</p>
+      <div className="p-6 border-b border-gray-200 flex flex-col items-start justify-center min-h-[88px]">
+        <Image src="/logo.svg" alt="Shifterz Logo" width={160} height={50} className="h-10 w-auto mb-1" priority />
+        <p className="text-[10px] text-gray-500 tracking-widest font-bold ml-1">PRO SUITE</p>
       </div>
 
       {/* Navigation Sections */}

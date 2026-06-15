@@ -63,7 +63,9 @@ export default function NewDocumentDialog({
 
   const handleItemChange = (index: number, field: string, value: string | number) => {
     const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
+    const updatedItem = { ...newItems[index], [field]: value };
+    updatedItem.amount = (updatedItem.qty || 0) * (updatedItem.price || 0);
+    newItems[index] = updatedItem;
     setItems(newItems);
   };
 

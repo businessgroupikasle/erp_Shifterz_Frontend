@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import Image from "next/image";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Info } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -60,9 +60,12 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-lg">
         <div className="bg-transparent backdrop-blur-3xl rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] p-8 md:p-10 border border-white/10 border-t-white/30 border-l-white/30">
           {/* Logo Section */}
-          <div className="text-center mb-8">
-            <div className="text-5xl font-black text-yellow-500 font-['Outfit'] mb-2">SHIFTERZ</div>
-            <p className="text-gray-400 text-sm">Professional Car Care Management</p>
+          <div className="text-center mb-8 flex flex-col items-center">
+            <div className="mb-3">
+              <Image src="/logo.svg" alt="Shifterz Logo" width={180} height={50} className="h-14 w-auto object-contain" priority />
+            </div>
+            <h1 className="text-4xl font-black text-yellow-500 font-['Outfit'] tracking-wide mb-1">SHIFTERZ</h1>
+            <p className="text-gray-400 text-sm font-medium tracking-wide">Professional Car Care Management</p>
           </div>
 
           {/* Error Message */}
@@ -136,9 +139,19 @@ export default function LoginPage() {
 
           {/* Demo Credentials Info */}
           <div className="mt-6 p-4 bg-white/5 backdrop-blur-md rounded-lg border border-white/10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
-            <p className="text-xs text-yellow-500 mb-2 font-semibold">📝 Demo Credentials:</p>
-            <p className="text-xs text-gray-300">Username: <span className="font-mono bg-white/5 border border-white/10 px-2 py-1 rounded shadow-inner">admin</span></p>
-            <p className="text-xs text-gray-300">Password: <span className="font-mono bg-white/5 border border-white/10 px-2 py-1 rounded shadow-inner">admin123</span></p>
+            <p className="text-xs text-yellow-500 mb-3 font-semibold flex items-center gap-2">
+              <Info className="w-4 h-4" /> Demo Credentials:
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs text-gray-300">
+                <span className="w-16 font-medium">Username:</span>
+                <span className="font-mono text-white bg-white/10 border border-white/20 px-2.5 py-1 rounded-md shadow-inner tracking-wider">admin</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-300">
+                <span className="w-16 font-medium">Password:</span>
+                <span className="font-mono text-white bg-white/10 border border-white/20 px-2.5 py-1 rounded-md shadow-inner tracking-wider">admin123</span>
+              </div>
+            </div>
           </div>
 
           {/* Footer */}

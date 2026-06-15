@@ -284,6 +284,7 @@ export default function BillingPage() {
         document={selectedDocument ? {
           docNo: selectedDocument.id,
           type: selectedDocument.type,
+          status: selectedDocument.status,
           client: selectedDocument.client,
           phone: selectedDocument.phone,
           vehicle: selectedDocument.vehicle,
