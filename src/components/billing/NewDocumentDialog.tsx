@@ -32,7 +32,7 @@ export default function NewDocumentDialog({
 }: NewDocumentDialogProps) {
   const [focusedItemIndex, setFocusedItemIndex] = useState<number | null>(null);
   const [formData, setFormData] = useState({
-    type: "Invoice",
+    type: "Estimate",
     status: "Pending",
     client: "",
     phone: "",
@@ -78,7 +78,7 @@ export default function NewDocumentDialog({
   useEffect(() => {
     if (!isOpen) {
       setFormData({
-        type: "Invoice",
+        type: "Estimate",
         status: "Pending",
         client: "",
         phone: "",
@@ -238,9 +238,9 @@ export default function NewDocumentDialog({
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50"
                 required
               >
-                <option>Invoice</option>
-                <option>Quotation</option>
                 <option>Estimate</option>
+                <option>Quotation</option>
+                <option>Invoice</option>
               </select>
             </div>
             <div>

@@ -276,15 +276,20 @@ export default function NewOutPassDialog({
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Security Guard <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <select
                 name="security"
                 value={formData.security}
                 onChange={handleChange}
-                placeholder="Guard name"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white"
                 required
-              />
+              >
+                <option value="">Select security guard</option>
+                <option>Prakash</option>
+                <option>Suresh</option>
+                <option>Ramesh</option>
+                <option>Venkat</option>
+                <option>Gopal</option>
+              </select>
             </div>
           </div>
 

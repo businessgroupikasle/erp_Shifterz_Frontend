@@ -45,7 +45,12 @@ export default function ConvertDocumentDialog({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "discount") {
+      const discountPercent = Math.min(100, Math.max(0, Number(value) || 0));
+      setFormData((prev) => ({ ...prev, [name]: discountPercent.toString() }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -56,13 +61,24 @@ export default function ConvertDocumentDialog({
       return;
     }
 
+    const amount = Number(formData.amount);
+    const gst = Number(formData.gst) || 0;
+    const discountPercent = Number(formData.discount) || 0;
+    const discountAmount = (amount * discountPercent) / 100;
+    const total = amount + gst - discountAmount;
+
+    if (total <= 0) {
+      toast.error("Total amount cannot be zero or negative. Reduce discount percentage.");
+      return;
+    }
+
     if (onSubmit && document) {
       onSubmit({
         ...document,
         type: targetType,
-        amount: Number(formData.amount),
-        gst: Number(formData.gst) || 0,
-        discount: Number(formData.discount) || 0,
+        amount: amount,
+        gst: gst,
+        discount: discountAmount,
         convertedFrom: document.id,
         previousType: document.type,
         conversionDate: new Date().toISOString().split("T")[0],
@@ -144,31 +160,40 @@ export default function ConvertDocumentDialog({
             />
           </div>
 
-          {/* Discount */}
+          {/* Discount Percentage */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
-              Discount (₹)
+              Discount (%)
             </label>
-            <input
-              type="number"
-              name="discount"
-              value={formData.discount}
-              onChange={handleChange}
-              placeholder="0"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              step="0.01"
-              min="0"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                name="discount"
+                value={formData.discount}
+                onChange={handleChange}
+                placeholder="0"
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                step="0.01"
+                min="0"
+                max="100"
+              />
+              <span className="text-sm font-bold text-gray-600">%</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              ₹{(
+                (Number(formData.amount || 0) * Number(formData.discount || 0)) / 100
+              ).toFixed(2)} off
+            </p>
           </div>
 
           {/* Total */}
-          <div className="bg-gray-50 rounded-lg p-3 mt-4">
+          <div className="bg-green-50 rounded-lg p-3 mt-4 border border-green-200">
             <p className="text-xs text-gray-600 mb-1">Total Amount:</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-green-700">
               ₹{(
                 Number(formData.amount || 0) +
                 Number(formData.gst || 0) -
-                Number(formData.discount || 0)
+                ((Number(formData.amount || 0) * Number(formData.discount || 0)) / 100)
               ).toLocaleString("en-IN", { maximumFractionDigits: 2 })}
             </p>
           </div>

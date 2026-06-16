@@ -114,6 +114,8 @@ export default function BillingPage() {
         return "bg-red-100 text-red-700";
       case "Approved":
         return "bg-blue-100 text-blue-700";
+      case "Converted":
+        return "bg-purple-100 text-purple-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -147,18 +149,13 @@ export default function BillingPage() {
       // Add new converted document
       await createInvoice(newDoc);
 
-      // Mark original as converted
-      const updatedOriginal = {
-        ...documentToConvert,
-        status: "Converted",
-        convertedTo: newDoc.id,
-      };
-      await updateInvoice(documentToConvert?.id || "", updatedOriginal);
+      // Delete original document instead of marking as converted
+      await deleteInvoice(documentToConvert?.id || "");
 
-      // Refresh documents
-      await fetchInvoices();
+      // Remove from UI
+      setDocuments(documents.filter((doc) => doc.id !== documentToConvert?.id));
 
-      toast.success(`Document converted to ${convertedData.type}`);
+      toast.success(`${documentToConvert?.type} converted to ${convertedData.type}`);
       setIsConvertOpen(false);
       setDocumentToConvert(null);
     } catch (err: any) {
@@ -247,7 +244,7 @@ export default function BillingPage() {
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
-            {["All", "Invoice", "Quotation", "Estimate"].map((tab) => (
+            {["All", "Estimate", "Quotation", "Invoice"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
