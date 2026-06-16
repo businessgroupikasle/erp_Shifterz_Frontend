@@ -152,14 +152,18 @@ export default function Header() {
                 <Link 
                   href="/dashboard/settings"
                   className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left transition-colors"
-                  onClick={() => setIsProfileOpen(false)}
+                  onMouseDown={(e) => {
+                    // Prevent default to avoid blur, or just let it redirect
+                    setIsProfileOpen(false);
+                  }}
                 >
                   <User className="w-4 h-4" />
                   Profile
                 </Link>
                 <div className="h-px bg-gray-100 my-1"></div>
                 <button 
-                  onClick={() => {
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // Prevents the button from losing focus immediately
                     localStorage.removeItem("token");
                     localStorage.removeItem("user");
                     sessionStorage.clear();

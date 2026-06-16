@@ -326,55 +326,55 @@ export default function DocumentPreviewDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-4xl shadow-xl flex flex-col max-h-[95vh]">
-        <div className="flex items-center justify-between p-6 border-b bg-gray-50">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">{document?.type} Preview</h2>
-            <p className="text-sm text-gray-500 mt-1">Doc No: {document?.docNo}</p>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl shadow-xl flex flex-col max-h-[95vh]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 md:p-6 border-b bg-gray-50 gap-3 sm:gap-0">
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">{document?.type} Preview</h2>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Doc No: {document?.docNo}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={handlePrint}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition-colors text-xs sm:text-base"
             >
-              <Printer className="w-5 h-5" />
-              Print
+              <Printer className="w-4 sm:w-5 h-4 sm:h-5" />
+              <span className="hidden sm:inline">Print</span>
             </button>
             <button
               onClick={onClose}
               className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <X className="w-6 h-6 text-gray-600" />
+              <X className="w-5 sm:w-6 h-5 sm:h-6 text-gray-600" />
             </button>
           </div>
         </div>
 
         {/* Info Header */}
-        <div className="grid grid-cols-4 gap-4 p-6 bg-blue-50 border-b border-blue-100">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 p-3 sm:p-4 md:p-6 bg-blue-50 border-b border-blue-100">
+          <div className="pb-2 sm:pb-0">
             <p className="text-xs font-semibold text-gray-500 uppercase">Client Name</p>
-            <p className="text-lg font-bold text-gray-900">{document?.client}</p>
+            <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{document?.client}</p>
           </div>
-          <div>
+          <div className="pb-2 sm:pb-0">
             <p className="text-xs font-semibold text-gray-500 uppercase">Phone</p>
-            <p className="text-lg font-bold text-gray-900">{document?.phone}</p>
+            <p className="text-base sm:text-lg font-bold text-gray-900">{document?.phone}</p>
           </div>
-          <div>
+          <div className="pb-2 sm:pb-0">
             <p className="text-xs font-semibold text-gray-500 uppercase">Vehicle</p>
-            <p className="text-lg font-bold text-gray-900">{document?.vehicle}</p>
+            <p className="text-base sm:text-lg font-bold text-gray-900">{document?.vehicle}</p>
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase">Total Amount</p>
-            <p className="text-lg font-bold text-green-600">{document?.total}</p>
+            <p className="text-base sm:text-lg font-bold text-green-600">{document?.total}</p>
           </div>
         </div>
 
         {/* Scrollable Document Preview Container */}
-        <div className="p-6 overflow-y-auto bg-gray-50 flex justify-center">
+        <div className="p-2 sm:p-3 md:p-6 overflow-y-auto bg-gray-50 flex justify-center">
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm w-full max-w-[800px] h-fit">
             {/* Header */}
-            <div className="bg-yellow-400 text-gray-900 px-8 py-6 flex justify-between items-start rounded-t-lg">
+            <div className="bg-yellow-400 text-gray-900 px-4 sm:px-6 md:px-8 py-4 sm:py-6 flex justify-between items-start rounded-t-lg gap-4">
               <div>
                 <h1 className="text-3xl font-bold mb-1 tracking-tight">SHIFTERZ</h1>
                 <p className="text-sm font-medium">{companyInfo?.address || '42, Race Course Rd, Coimbatore - 641018'}</p>
@@ -398,24 +398,24 @@ export default function DocumentPreviewDialog({
             </div>
 
             {/* Content */}
-            <div className="p-8">
+            <div className="p-3 sm:p-4 md:p-6 lg:p-8">
               {/* Bill To & Details */}
-              <div className="flex justify-between mb-8">
-                <div className="max-w-[50%]">
+              <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 mb-4 sm:mb-6 md:mb-8">
+                <div className="flex-1">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Bill To
                   </p>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 truncate">
                     {document.client}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-1">{document.phone}</p>
-                  <p className="text-sm text-gray-600 font-medium">{document.vehicle}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">{document.phone}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 font-medium">{document.vehicle}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Details
                   </p>
-                  <table className="text-sm ml-auto">
+                  <table className="text-xs sm:text-sm ml-auto">
                     <tbody>
                       <tr>
                         <td className="pr-4 text-gray-500 font-medium pb-1">Date:</td>
@@ -441,20 +441,20 @@ export default function DocumentPreviewDialog({
               </div>
 
               {/* Description Table */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden mb-8">
-                <table className="w-full">
+              <div className="border border-gray-200 rounded-lg overflow-x-auto mb-4 sm:mb-6 md:mb-8">
+                <table className="w-full text-xs sm:text-sm">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Description
                       </th>
-                      <th className="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Qty
                       </th>
-                      <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Unit Price
                       </th>
-                      <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Amount
                       </th>
                     </tr>
@@ -465,49 +465,49 @@ export default function DocumentPreviewDialog({
                         const itemAmount = item.amount || (item.qty * item.price) || 0;
                         return (
                         <tr key={idx} className="bg-white">
-                          <td className="px-6 py-4 text-sm text-gray-900 font-medium">{item.desc}</td>
-                          <td className="px-6 py-4 text-sm text-center text-gray-600">{item.qty}</td>
-                          <td className="px-6 py-4 text-sm text-right text-gray-600">₹{Number(item.price || 0).toLocaleString("en-IN")}</td>
-                          <td className="px-6 py-4 text-sm text-right text-gray-900 font-semibold">
+                          <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-gray-900 font-medium truncate">{item.desc}</td>
+                          <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-center text-gray-600">{item.qty}</td>
+                          <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-600">₹{Number(item.price || 0).toLocaleString("en-IN")}</td>
+                          <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-900 font-semibold">
                             ₹{Number(itemAmount).toLocaleString("en-IN")}
                           </td>
                         </tr>
                       )})
                     ) : (
                       <tr className="bg-white">
-                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">{document.service}</td>
-                        <td className="px-6 py-4 text-sm text-center text-gray-600">1</td>
-                        <td className="px-6 py-4 text-sm text-right text-gray-600">{document.base}</td>
-                        <td className="px-6 py-4 text-sm text-right text-gray-900 font-semibold">
+                        <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-gray-900 font-medium">{document.service}</td>
+                        <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-center text-gray-600">1</td>
+                        <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-600">{document.base}</td>
+                        <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-900 font-semibold">
                           {document.base}
                         </td>
                       </tr>
                     )}
                     <tr className="bg-gray-50/50">
-                      <td colSpan={3} className="px-6 py-4 text-right text-sm text-gray-600 font-medium">Subtotal</td>
-                      <td className="px-6 py-4 text-right text-sm text-gray-900 font-bold">
+                      <td colSpan={3} className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-600 font-medium">Subtotal</td>
+                      <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-900 font-bold">
                         {document.base.includes('₹') ? document.base : `₹${document.base}`}
                       </td>
                     </tr>
                     <tr className="bg-gray-50/50">
-                      <td colSpan={3} className="px-6 py-4 text-right text-sm text-gray-600 font-medium">GST (18%)</td>
-                      <td className="px-6 py-4 text-right text-sm text-gray-900 font-semibold">
+                      <td colSpan={3} className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-600 font-medium">GST (18%)</td>
+                      <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-900 font-semibold">
                         {document.gst.includes('₹') ? document.gst : `₹${document.gst}`}
                       </td>
                     </tr>
                     {document.discount && (
                       <tr className="bg-gray-50/50">
-                        <td colSpan={3} className="px-6 py-4 text-right text-sm text-gray-600 font-medium">Discount</td>
-                        <td className="px-6 py-4 text-right text-sm text-red-600 font-semibold">
+                        <td colSpan={3} className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-gray-600 font-medium">Discount</td>
+                        <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 text-right text-red-600 font-semibold">
                           -{document.discount.includes('₹') ? document.discount : `₹${document.discount}`}
                         </td>
                       </tr>
                     )}
                     <tr className="bg-yellow-50">
-                      <td colSpan={3} className="px-6 py-5 text-right font-bold text-gray-900 uppercase tracking-wider">
+                      <td colSpan={3} className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 md:py-5 text-right font-bold text-gray-900 uppercase tracking-wider text-xs sm:text-sm">
                         Total
                       </td>
-                      <td className="px-6 py-5 text-right font-bold text-yellow-600 text-xl">
+                      <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-4 md:py-5 text-right font-bold text-yellow-600 text-base sm:text-lg md:text-xl">
                         {document.total.includes('₹') ? document.total : `₹${document.total}`}
                       </td>
                     </tr>
@@ -516,8 +516,8 @@ export default function DocumentPreviewDialog({
               </div>
 
               {/* Terms & Signatory */}
-              <div className="flex justify-between mt-10 text-sm">
-                <div className="flex-[2] pr-12 space-y-6">
+              <div className="flex flex-col md:flex-row justify-between gap-6 mt-6 sm:mt-8 md:mt-10 text-xs sm:text-sm">
+                <div className="flex-1 md:flex-[2] md:pr-12 space-y-3 sm:space-y-4 md:space-y-6">
                   {document.paymentTerms && (
                     <div>
                       <h4 className="font-bold text-gray-900 mb-2 uppercase tracking-wide text-xs">Payment Terms</h4>

@@ -257,42 +257,42 @@ export default function PaymentHistoryDialog({
   const pendingAmount = Math.max(0, totalAmount - totalPaid);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md md:max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-400 p-2 rounded-lg">
-              <History className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="bg-blue-400 p-1.5 sm:p-2 rounded-lg">
+              <History className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Payment History</h2>
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Payment History</h2>
           </div>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            <X className="w-5 sm:w-6 h-5 sm:h-6 text-gray-600" />
           </button>
         </div>
 
         {/* Summary */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6 border-2 border-blue-200">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border-2 border-blue-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+            <div className="pb-2 sm:pb-0 sm:border-r border-blue-100 pr-3">
               <p className="text-xs text-gray-600 font-bold uppercase">Total Amount</p>
-              <p className="text-lg sm:text-xl font-bold text-gray-900">
+              <p className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
                 ₹{totalAmount.toLocaleString("en-IN")}
               </p>
             </div>
-            <div>
+            <div className="pb-2 sm:pb-0 sm:pr-3 sm:border-r border-blue-100 md:pr-3">
               <p className="text-xs text-gray-600 font-bold uppercase">Total Paid</p>
-              <p className="text-lg sm:text-xl font-bold text-green-600">
+              <p className="text-base sm:text-lg md:text-xl font-bold text-green-600">
                 ₹{totalPaid.toLocaleString("en-IN")}
               </p>
             </div>
-            <div>
+            <div className="md:pl-3">
               <p className="text-xs text-gray-600 font-bold uppercase">Pending Amount</p>
-              <p className={`text-lg sm:text-xl font-bold ${pendingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
+              <p className={`text-base sm:text-lg md:text-xl font-bold ${pendingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
                 ₹{pendingAmount.toLocaleString("en-IN")}
               </p>
             </div>
@@ -301,36 +301,36 @@ export default function PaymentHistoryDialog({
 
         {/* Payments List */}
         {isLoading ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500">Loading payment history...</p>
+          <div className="text-center py-6 sm:py-8">
+            <p className="text-gray-500 text-sm sm:text-base">Loading payment history...</p>
           </div>
         ) : payments.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No payments recorded yet</p>
+          <div className="text-center py-6 sm:py-8">
+            <p className="text-gray-500 text-sm sm:text-base">No payments recorded yet</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {payments.map((payment, index) => (
               <div
                 key={payment.id}
-                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:bg-gray-50 transition-colors"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="text-sm font-bold text-gray-900">
+                <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">
                       Payment #{index + 1} - {payment.id}
                     </p>
                     <p className="text-xs text-gray-500">{payment.date}</p>
                   </div>
                   <button
                     onClick={() => handlePrintReceipt(payment)}
-                    className="p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-600"
+                    className="p-1.5 sm:p-2 hover:bg-blue-100 rounded-lg transition-colors text-blue-600 shrink-0"
                     title="Print Receipt"
                   >
                     <Printer className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs sm:text-sm">
                   <div>
                     <p className="text-xs text-gray-500">Amount</p>
                     <p className="font-bold text-green-600">₹{Number(payment.amount).toLocaleString("en-IN")}</p>

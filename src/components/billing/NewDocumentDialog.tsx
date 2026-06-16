@@ -222,24 +222,24 @@ export default function NewDocumentDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-8 w-full max-w-4xl shadow-xl max-h-[95vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-10 pb-4 border-b">
-          <div className="flex items-center gap-3">
-            <FileText className="w-6 h-6 text-yellow-500" />
-            <h2 className="text-2xl font-bold text-gray-900">New Document</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl shadow-xl max-h-[95vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 sticky top-0 bg-white z-10 pb-3 sm:pb-4 border-b">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <FileText className="w-5 sm:w-6 h-5 sm:h-6 text-yellow-500" />
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">New Document</h2>
           </div>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            <X className="w-5 sm:w-6 h-5 sm:h-6 text-gray-600" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
           {/* Row 1: Type & Status */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
                 Document Type <span className="text-red-500">*</span>
@@ -275,7 +275,7 @@ export default function NewDocumentDialog({
           </div>
 
           {/* Row 2: Client & Phone */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
                 Client Name <span className="text-red-500">*</span>
@@ -313,7 +313,7 @@ export default function NewDocumentDialog({
           </div>
 
           {/* Row 3: Vehicle & Dates */}
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 flex justify-between">
                 <span>Vehicle No.</span>
@@ -372,10 +372,10 @@ export default function NewDocumentDialog({
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3 overflow-x-auto">
               {items.map((item, index) => (
-                <div key={index} className="flex gap-4 items-start">
-                  <div className="flex-grow relative">
+                <div key={index} className="flex gap-2 sm:gap-3 lg:gap-4 items-start min-w-min sm:min-w-full">
+                  <div className="flex-grow relative min-w-0">
                     <input
                       type="text"
                       value={item.desc}
@@ -383,7 +383,7 @@ export default function NewDocumentDialog({
                       onFocus={() => setFocusedItemIndex(index)}
                       onBlur={() => setTimeout(() => setFocusedItemIndex(null), 200)}
                       placeholder="Service Description"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                      className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none text-sm"
                       required
                       autoComplete="off"
                     />
@@ -428,38 +428,38 @@ export default function NewDocumentDialog({
                       </div>
                     )}
                   </div>
-                  <div className="w-24">
+                  <div className="w-16 sm:w-20 lg:w-24 shrink-0">
                     <input
                       type="number"
                       value={item.qty}
                       onChange={(e) => handleItemChange(index, "qty", parseFloat(e.target.value))}
                       placeholder="Qty"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
+                      className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 text-sm"
                       min="1"
                       required
                     />
                   </div>
-                  <div className="w-32">
+                  <div className="w-20 sm:w-28 lg:w-32 shrink-0">
                     <input
                       type="number"
                       value={item.price}
                       onChange={(e) => handleItemChange(index, "price", parseFloat(e.target.value))}
                       placeholder="Price"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
+                      className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 text-sm"
                       min="0"
                       required
                     />
                   </div>
-                  <div className="w-32">
+                  <div className="w-20 sm:w-28 lg:w-32 shrink-0">
                     <input
                       type="number"
                       value={item.amount}
                       readOnly
                       placeholder="Amount"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                      className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-sm"
                     />
                   </div>
-                  <div className="pt-2">
+                  <div className="pt-2 shrink-0">
                     <button
                       type="button"
                       onClick={() => removeItem(index)}
@@ -474,8 +474,8 @@ export default function NewDocumentDialog({
             </div>
 
             {/* Totals */}
-            <div className="flex justify-end mt-4 text-sm">
-              <div className="w-64 space-y-2">
+            <div className="flex justify-end mt-3 sm:mt-4 text-xs sm:text-sm overflow-x-auto">
+              <div className="w-56 sm:w-64 md:w-72 space-y-2 shrink-0">
                 <div className="flex justify-between">
                   <span className="font-semibold text-gray-600">Subtotal:</span>
                   <span>₹{baseAmount.toFixed(2)}</span>
@@ -486,13 +486,13 @@ export default function NewDocumentDialog({
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-gray-600">Discount (%):</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <input
                       type="number"
                       name="discount"
                       value={formData.discount}
                       onChange={handleChange}
-                      className="w-24 px-2 py-1 border border-gray-300 rounded text-right"
+                      className="w-16 sm:w-20 px-2 py-1 border border-gray-300 rounded text-right text-sm"
                       placeholder="0"
                       min="0"
                       max="100"
@@ -513,10 +513,10 @@ export default function NewDocumentDialog({
             </div>
           </div>
 
-          <hr className="my-6" />
+          <hr className="my-4 sm:my-5 lg:my-6" />
 
           {/* Additional Terms */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
                 Payment Terms
