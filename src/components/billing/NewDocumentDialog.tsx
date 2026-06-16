@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { X, FileText, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { fetchVehicleDetails } from "@/lib/api";
+import { fetchVehicleDetails, getServices } from "@/lib/api";
 
 interface NewDocumentDialogProps {
   isOpen: boolean;
@@ -52,6 +52,7 @@ export default function NewDocumentDialog({
   const [baseAmount, setBaseAmount] = useState(0);
   const [gstAmount, setGstAmount] = useState(0);
   const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
 
   const handleVehicleBlur = async () => {
     const vNo = formData.vehicle.trim().toUpperCase();
@@ -94,6 +95,14 @@ export default function NewDocumentDialog({
         authorizedSignatory: "Authorized Signatory",
       });
       setItems([{ desc: "", qty: 1, price: 0, amount: 0 }]);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      getServices()
+        .then((data) => setAvailableServices(data))
+        .catch((err) => console.error("Failed to load services:", err));
     }
   }, [isOpen]);
 
@@ -329,6 +338,7 @@ export default function NewDocumentDialog({
                 name="invoiceDate"
                 value={formData.invoiceDate}
                 onChange={handleChange}
+                min={new Date().toISOString().split("T")[0]}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50 uppercase"
               />
             </div>
@@ -341,6 +351,7 @@ export default function NewDocumentDialog({
                 name="dueDate"
                 value={formData.dueDate}
                 onChange={handleChange}
+                min={new Date().toISOString().split("T")[0]}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-gray-50 uppercase"
               />
             </div>
@@ -378,19 +389,36 @@ export default function NewDocumentDialog({
                     />
                     {focusedItemIndex === index && (
                       <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto top-full left-0">
-                        {COMMON_SERVICES.filter(s => s.toLowerCase().includes(item.desc.toLowerCase())).map((service) => (
-                          <div
-                            key={service}
-                            className="px-4 py-2.5 hover:bg-yellow-50 cursor-pointer text-sm text-gray-700 font-medium transition-colors border-b border-gray-50 last:border-0"
-                            onClick={() => {
-                              handleItemChange(index, "desc", service);
-                              setFocusedItemIndex(null);
-                            }}
-                          >
-                            {service}
-                          </div>
-                        ))}
-                        {item.desc && !COMMON_SERVICES.some(s => s.toLowerCase() === item.desc.toLowerCase()) && (
+                        {availableServices.length > 0 
+                          ? availableServices.filter(s => s.name.toLowerCase().includes(item.desc.toLowerCase())).map((service) => (
+                              <div
+                                key={service.id}
+                                className="px-4 py-2.5 hover:bg-yellow-50 cursor-pointer text-sm text-gray-700 font-medium transition-colors border-b border-gray-50 last:border-0"
+                                onClick={() => {
+                                  const newItems = [...items];
+                                  newItems[index].desc = service.name;
+                                  newItems[index].price = service.price || 0;
+                                  newItems[index].amount = newItems[index].qty * (service.price || 0);
+                                  setItems(newItems);
+                                  setFocusedItemIndex(null);
+                                }}
+                              >
+                                {service.name} (₹{service.price?.toLocaleString("en-IN") || 0})
+                              </div>
+                            ))
+                          : COMMON_SERVICES.filter(s => s.toLowerCase().includes(item.desc.toLowerCase())).map((service) => (
+                              <div
+                                key={service}
+                                className="px-4 py-2.5 hover:bg-yellow-50 cursor-pointer text-sm text-gray-700 font-medium transition-colors border-b border-gray-50 last:border-0"
+                                onClick={() => {
+                                  handleItemChange(index, "desc", service);
+                                  setFocusedItemIndex(null);
+                                }}
+                              >
+                                {service}
+                              </div>
+                            ))}
+                        {item.desc && !availableServices.some(s => s.name.toLowerCase() === item.desc.toLowerCase()) && !COMMON_SERVICES.some(s => s.toLowerCase() === item.desc.toLowerCase()) && (
                           <div
                             className="px-4 py-2.5 bg-gray-50 text-sm text-gray-500 font-medium border-t border-gray-100"
                           >

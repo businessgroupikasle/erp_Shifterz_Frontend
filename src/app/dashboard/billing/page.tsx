@@ -165,12 +165,18 @@ export default function BillingPage() {
       // Add new converted document to database
       await createInvoice(newDoc);
 
-      // Delete original document instead of marking as converted
-      await deleteInvoice(documentToConvert?.id || "");
+      // Mark original as "Converted" instead of deleting
+      const updatedOriginal = {
+        ...documentToConvert,
+        status: "Converted",
+      };
+      await updateInvoice(documentToConvert?.id || "", updatedOriginal);
 
-      // Update UI immediately - add new doc and remove old one
+      // Update UI immediately - add new doc and update old one
       setDocuments((prevDocs) => [
-        ...prevDocs.filter((doc) => doc.id !== documentToConvert?.id),
+        ...prevDocs.map((doc) =>
+          doc.id === documentToConvert?.id ? updatedOriginal : doc
+        ),
         newDoc,
       ]);
 
