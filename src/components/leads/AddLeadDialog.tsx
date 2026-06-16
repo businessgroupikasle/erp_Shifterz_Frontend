@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { X, User } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { fetchVehicleDetails } from "@/lib/api";
 
 interface AddLeadDialogProps {
   isOpen: boolean;
@@ -53,6 +54,25 @@ export default function AddLeadDialog({
       setFormData((prev) => ({ ...prev, [name]: formatVehicleNumber(value) }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleVehicleBlur = async () => {
+    if (formData.vehicle.length > 4 && (!formData.name || !formData.phone)) {
+      try {
+        const details = await fetchVehicleDetails(formData.vehicle);
+        if (details && details.name) {
+          setFormData((prev) => ({
+            ...prev,
+            name: prev.name || details.name,
+            phone: prev.phone || details.phone,
+            email: prev.email || details.email || prev.email,
+          }));
+          toast.success("Customer details auto-filled!");
+        }
+      } catch (error) {
+        // Ignore if vehicle not found
+      }
     }
   };
 
@@ -183,6 +203,7 @@ export default function AddLeadDialog({
                 name="vehicle"
                 value={formData.vehicle}
                 onChange={handleChange}
+                onBlur={handleVehicleBlur}
                 placeholder="TN 04 XX 0000"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-gray-50 text-gray-900 uppercase"
               />

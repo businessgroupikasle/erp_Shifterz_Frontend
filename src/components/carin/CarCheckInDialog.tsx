@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Car, Clock, Calendar, Plus } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { getServices } from "@/lib/api";
+import { getServices, fetchVehicleDetails } from "@/lib/api";
 import AddTechnicianDialog from "./AddTechnicianDialog";
 
 interface CarCheckInDialogProps {
@@ -148,6 +148,25 @@ export default function CarCheckInDialog({
     }
   };
 
+  const handleVehicleBlur = async () => {
+    if (formData.vehicleNumber.length > 4 && (!formData.customerName || !formData.phone)) {
+      try {
+        const details = await fetchVehicleDetails(formData.vehicleNumber);
+        if (details && details.name) {
+          setFormData((prev) => ({
+            ...prev,
+            customerName: prev.customerName || details.name,
+            phone: prev.phone || details.phone,
+            carModel: prev.carModel || details.model,
+          }));
+          toast.success("Customer details auto-filled!");
+        }
+      } catch (error) {
+        // Ignore if vehicle not found
+      }
+    }
+  };
+
   const handleAddTechnician = (technicianData: {
     name: string;
     phone: string;
@@ -226,6 +245,7 @@ export default function CarCheckInDialog({
                 name="vehicleNumber"
                 value={formData.vehicleNumber}
                 onChange={handleChange}
+                onBlur={handleVehicleBlur}
                 placeholder="TN 04 XX 0000"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent uppercase"
                 required

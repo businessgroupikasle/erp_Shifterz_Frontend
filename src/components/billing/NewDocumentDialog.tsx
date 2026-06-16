@@ -151,6 +151,9 @@ export default function NewDocumentDialog({
       setFormData((prev) => ({ ...prev, [name]: formatVehicleNumber(value) }));
     } else if (name === "gstNumber") {
       setFormData((prev) => ({ ...prev, [name]: value.toUpperCase().slice(0, 15) }));
+    } else if (name === "discount") {
+      const discountPercent = Math.min(100, Math.max(0, Number(value) || 0));
+      setFormData((prev) => ({ ...prev, [name]: discountPercent.toString() }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -169,8 +172,9 @@ export default function NewDocumentDialog({
     }
 
     if (onSubmit) {
-      const discountAmount = parseFloat(formData.discount) || 0;
-      
+      const discountPercent = parseFloat(formData.discount) || 0;
+      const discountAmount = (baseAmount * discountPercent) / 100;
+
       const docTypePrefix = {
         Invoice: "INV",
         Quotation: "QT",
@@ -453,20 +457,28 @@ export default function NewDocumentDialog({
                   <span>₹{gstAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-gray-600">Discount (₹):</span>
-                  <input
-                    type="number"
-                    name="discount"
-                    value={formData.discount}
-                    onChange={handleChange}
-                    className="w-24 px-2 py-1 border border-gray-300 rounded text-right"
-                    placeholder="0"
-                  />
+                  <span className="font-semibold text-gray-600">Discount (%):</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      name="discount"
+                      value={formData.discount}
+                      onChange={handleChange}
+                      className="w-24 px-2 py-1 border border-gray-300 rounded text-right"
+                      placeholder="0"
+                      min="0"
+                      max="100"
+                    />
+                    <span className="text-sm text-gray-500">%</span>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500 text-right">
+                  ₹{((baseAmount * (parseFloat(formData.discount) || 0)) / 100).toFixed(2)} off
                 </div>
                 <div className="flex justify-between pt-2 border-t font-bold text-lg">
                   <span>Total:</span>
                   <span className="text-yellow-600">
-                    ₹{(baseAmount + gstAmount - (parseFloat(formData.discount) || 0)).toFixed(2)}
+                    ₹{(baseAmount + gstAmount - ((baseAmount * (parseFloat(formData.discount) || 0)) / 100)).toFixed(2)}
                   </span>
                 </div>
               </div>

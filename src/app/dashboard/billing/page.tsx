@@ -2,12 +2,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
-import { Plus, Eye, Check, Trash2, Search, Receipt, ArrowRight } from "lucide-react";
+import { Plus, Eye, Check, Trash2, Search, Receipt, ArrowRight, History } from "lucide-react";
 import NewDocumentDialog from "@/components/billing/NewDocumentDialog";
 import DocumentPreviewDialog from "@/components/billing/DocumentPreviewDialog";
 import ConvertDocumentDialog from "@/components/billing/ConvertDocumentDialog";
 import RecordPaymentDialog from "@/components/payments/RecordPaymentDialog";
 import PaymentReceiptDialog from "@/components/payments/PaymentReceiptDialog";
+import PaymentHistoryDialog from "@/components/payments/PaymentHistoryDialog";
 import { toast } from "react-hot-toast";
 import { getInvoices, createInvoice, updateInvoice, deleteInvoice, createPayment } from "@/lib/api";
 
@@ -26,6 +27,7 @@ interface BillingDocument {
   dueDate: string;
   status: string;
   notes: string;
+  paidAmount?: number;
   gstNumber?: string;
   items?: any;
   bankDetails?: string;
@@ -44,10 +46,12 @@ export default function BillingPage() {
   const [isConvertOpen, setIsConvertOpen] = useState(false);
   const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
   const [isPaymentReceiptOpen, setIsPaymentReceiptOpen] = useState(false);
+  const [isPaymentHistoryOpen, setIsPaymentHistoryOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<BillingDocument | null>(null);
   const [documentToConvert, setDocumentToConvert] = useState<BillingDocument | null>(null);
   const [documentToMarkPaid, setDocumentToMarkPaid] = useState<BillingDocument | null>(null);
   const [selectedPaymentDocument, setSelectedPaymentDocument] = useState<BillingDocument | null>(null);
+  const [documentForPaymentHistory, setDocumentForPaymentHistory] = useState<BillingDocument | null>(null);
 
   const fetchInvoices = async () => {
     try {
@@ -110,6 +114,8 @@ export default function BillingPage() {
         return "bg-green-100 text-green-700";
       case "Pending":
         return "bg-yellow-100 text-yellow-700";
+      case "Partially Paid":
+        return "bg-orange-100 text-orange-700";
       case "Overdue":
         return "bg-red-100 text-red-700";
       case "Approved":
@@ -141,21 +147,34 @@ export default function BillingPage() {
 
   const handleConvertDocument = async (convertedData: any) => {
     try {
+      const docTypeMap: Record<string, string> = {
+        Invoice: "INV",
+        Quotation: "QT",
+        Estimate: "EST",
+      };
+      const docTypePrefix = docTypeMap[convertedData.type] || "DOC";
+
+      const newDocId = `${docTypePrefix}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
+
       const newDoc = {
         ...convertedData,
-        id: `${convertedData.type.substring(0, 3).toUpperCase()}-${Date.now()}`,
+        id: newDocId,
+        date: new Date().toISOString().split("T")[0],
       };
 
-      // Add new converted document
+      // Add new converted document to database
       await createInvoice(newDoc);
 
       // Delete original document instead of marking as converted
       await deleteInvoice(documentToConvert?.id || "");
 
-      // Remove from UI
-      setDocuments(documents.filter((doc) => doc.id !== documentToConvert?.id));
+      // Update UI immediately - add new doc and remove old one
+      setDocuments((prevDocs) => [
+        ...prevDocs.filter((doc) => doc.id !== documentToConvert?.id),
+        newDoc,
+      ]);
 
-      toast.success(`${documentToConvert?.type} converted to ${convertedData.type}`);
+      toast.success(`${documentToConvert?.type} converted to ${convertedData.type} (${newDocId})`);
       setIsConvertOpen(false);
       setDocumentToConvert(null);
     } catch (err: any) {
@@ -170,6 +189,9 @@ export default function BillingPage() {
 
       const invoiceId = documentToMarkPaid.id;
       const totalAmount = (documentToMarkPaid.amount || 0) + (documentToMarkPaid.gst || 0) - (documentToMarkPaid.discount || 0);
+      const currentPaidAmount = documentToMarkPaid.paidAmount || 0;
+      const newPaidAmount = currentPaidAmount + (paymentData.amount || 0);
+      const isFullyPaid = newPaidAmount >= totalAmount;
 
       const paymentRecord = {
         invoiceId,
@@ -177,7 +199,7 @@ export default function BillingPage() {
         phone: documentToMarkPaid.phone,
         vehicle: documentToMarkPaid.vehicle,
         service: documentToMarkPaid.service,
-        amount: totalAmount,
+        amount: paymentData.amount || totalAmount,
         mode: paymentData.mode || "Cash",
         date: paymentData.date || new Date().toISOString().split("T")[0],
         ref: paymentData.reference || invoiceId,
@@ -185,18 +207,29 @@ export default function BillingPage() {
       };
 
       await createPayment(paymentRecord);
-      await updateInvoice(invoiceId, { ...documentToMarkPaid, status: "Paid" });
+
+      const updatedStatus = isFullyPaid ? "Paid" : "Partially Paid";
+      await updateInvoice(invoiceId, {
+        ...documentToMarkPaid,
+        status: updatedStatus,
+        paidAmount: newPaidAmount
+      });
 
       setDocuments(
         documents.map((d) =>
-          d.id === invoiceId ? { ...d, status: "Paid" } : d
+          d.id === invoiceId ? {
+            ...d,
+            status: updatedStatus,
+            paidAmount: newPaidAmount
+          } : d
         )
       );
 
+      toast.success(`Payment recorded! Status: ${updatedStatus}`);
       setIsRecordPaymentOpen(false);
       setDocumentToMarkPaid(null);
     } catch (err: any) {
-      alert("Failed to record payment: " + err.message);
+      toast.error("Failed to record payment: " + err.message);
     }
   };
 
@@ -309,16 +342,21 @@ export default function BillingPage() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Doc No.</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Client</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Vehicle</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Service</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Amount</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Paid Amount</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Pending Amount</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredDocs.map((doc) => (
+              {filteredDocs.map((doc) => {
+                const totalAmount = (doc.amount || 0) + (doc.gst || 0) - (doc.discount || 0);
+                const paidAmount = doc.paidAmount || 0;
+                const remainingAmount = Math.max(0, totalAmount - paidAmount);
+
+                return (
                 <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-semibold text-yellow-600">{doc.id}</td>
                   <td className="px-6 py-4 text-sm">
@@ -330,10 +368,16 @@ export default function BillingPage() {
                     <div className="font-semibold text-gray-900">{doc.client}</div>
                     <div className="text-xs text-gray-500">{doc.phone}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{doc.vehicle}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{doc.service}</td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                    ₹{((doc.amount || 0) + (doc.gst || 0) - (doc.discount || 0)).toLocaleString("en-IN")}
+                    ₹{totalAmount.toLocaleString("en-IN")}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-semibold text-green-600">
+                    ₹{paidAmount.toLocaleString("en-IN")}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-semibold">
+                    <span className={remainingAmount > 0 ? "text-red-600" : "text-green-600"}>
+                      ₹{remainingAmount.toLocaleString("en-IN")}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{doc.date}</td>
                   <td className="px-6 py-4 text-sm">
@@ -364,17 +408,31 @@ export default function BillingPage() {
                       >
                         <Check className={`w-4 h-4 ${doc.status === "Paid" ? "text-green-600" : "text-gray-600"}`} />
                       </button>
-                      {doc.status === "Paid" && (
-                        <button
-                          onClick={() => {
-                            setSelectedPaymentDocument(doc);
-                            setIsPaymentReceiptOpen(true);
-                          }}
-                          className="p-1 hover:bg-blue-100 rounded transition-colors"
-                          title="View Payment Details"
-                        >
-                          <Receipt className="w-4 h-4 text-blue-600" />
-                        </button>
+                      {(doc.status === "Paid" || doc.status === "Partially Paid") && (
+                        <>
+                          <button
+                            onClick={() => {
+                              setDocumentForPaymentHistory(doc);
+                              setIsPaymentHistoryOpen(true);
+                            }}
+                            className="p-1 hover:bg-purple-100 rounded transition-colors"
+                            title="View Payment History"
+                          >
+                            <History className="w-4 h-4 text-purple-600" />
+                          </button>
+                          {doc.status === "Paid" && (
+                            <button
+                              onClick={() => {
+                                setSelectedPaymentDocument(doc);
+                                setIsPaymentReceiptOpen(true);
+                              }}
+                              className="p-1 hover:bg-blue-100 rounded transition-colors"
+                              title="View Payment Details"
+                            >
+                              <Receipt className="w-4 h-4 text-blue-600" />
+                            </button>
+                          )}
+                        </>
                       )}
                       {(doc.type === "Estimate" || doc.type === "Quotation") && doc.status !== "Paid" && (
                         <button
@@ -398,7 +456,8 @@ export default function BillingPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>
@@ -423,6 +482,7 @@ export default function BillingPage() {
           service: selectedDocument.service,
           base: (selectedDocument.amount || 0).toString(),
           gst: (selectedDocument.gst || 0).toString(),
+          discount: (selectedDocument.discount || 0) > 0 ? `₹${(selectedDocument.discount || 0).toLocaleString("en-IN")}` : undefined,
           total: ((selectedDocument.amount || 0) + (selectedDocument.gst || 0) - (selectedDocument.discount || 0)).toString(),
           date: selectedDocument.date,
           due: selectedDocument.dueDate,
@@ -450,13 +510,7 @@ export default function BillingPage() {
           setDocumentToMarkPaid(null);
         }}
         onSubmit={handleRecordPayment}
-        invoiceData={documentToMarkPaid ? {
-          id: documentToMarkPaid.id,
-          client: documentToMarkPaid.client,
-          phone: documentToMarkPaid.phone,
-          amount: (documentToMarkPaid.amount || 0) + (documentToMarkPaid.gst || 0) - (documentToMarkPaid.discount || 0),
-          date: documentToMarkPaid.date
-        } : undefined}
+        invoiceData={documentToMarkPaid || undefined}
       />
       <PaymentReceiptDialog
         isOpen={isPaymentReceiptOpen}
@@ -476,6 +530,21 @@ export default function BillingPage() {
           date: selectedPaymentDocument.date,
           reference: selectedPaymentDocument.id,
           notes: selectedPaymentDocument.notes
+        } : undefined}
+      />
+      <PaymentHistoryDialog
+        isOpen={isPaymentHistoryOpen}
+        onClose={() => {
+          setIsPaymentHistoryOpen(false);
+          setDocumentForPaymentHistory(null);
+        }}
+        invoiceId={documentForPaymentHistory?.id}
+        invoiceData={documentForPaymentHistory ? {
+          id: documentForPaymentHistory.id,
+          client: documentForPaymentHistory.client,
+          amount: documentForPaymentHistory.amount || 0,
+          gst: documentForPaymentHistory.gst || 0,
+          discount: documentForPaymentHistory.discount || 0,
         } : undefined}
       />
     </div>

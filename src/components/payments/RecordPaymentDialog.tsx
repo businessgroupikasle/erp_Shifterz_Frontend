@@ -13,6 +13,9 @@ interface RecordPaymentDialogProps {
     client: string;
     phone?: string;
     amount: number;
+    gst?: number;
+    discount?: number;
+    paidAmount?: number;
     date?: string;
   };
 }
@@ -37,12 +40,16 @@ export default function RecordPaymentDialog({
 
   useEffect(() => {
     if (isOpen && invoiceData) {
+      const total = (invoiceData.amount || 0) + (invoiceData.gst || 0) - (invoiceData.discount || 0);
+      const paid = invoiceData.paidAmount || 0;
+      const remaining = Math.max(0, total - paid);
+
       setFormData({
         client: invoiceData.client || "",
         phone: invoiceData.phone || "",
         invoiceNo: invoiceData.id || "",
-        totalAmount: invoiceData.amount?.toString() || "",
-        amount: invoiceData.amount?.toString() || "",
+        totalAmount: remaining.toString(),
+        amount: remaining.toString(),
         mode: "UPI",
         date: invoiceData.date || new Date().toISOString().split("T")[0],
         reference: "",
@@ -63,6 +70,16 @@ export default function RecordPaymentDialog({
     >
   ) => {
     const { name, value } = e.target;
+    
+    if (name === "amount") {
+      const numValue = Number(value);
+      const maxAmount = Number(formData.totalAmount) || 0;
+      if (numValue > maxAmount) {
+        setFormData((prev) => ({ ...prev, [name]: maxAmount.toString() }));
+        return;
+      }
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -103,8 +120,8 @@ export default function RecordPaymentDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md md:max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -123,9 +140,9 @@ export default function RecordPaymentDialog({
 
         {/* Invoice Info Header */}
         {invoiceData && (
-          <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6">
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
             <p className="text-xs text-blue-600 font-bold uppercase mb-2">Fetched Invoice Data</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <p className="text-xs text-gray-500">Client</p>
                 <p className="text-sm font-bold text-gray-900">{formData.client}</p>
@@ -146,9 +163,9 @@ export default function RecordPaymentDialog({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {/* Row 1: Client Name & Invoice No (Read-only) */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                 Client Name
@@ -178,7 +195,7 @@ export default function RecordPaymentDialog({
           </div>
 
           {/* Row 2: Phone & Total Amount (Read-only) */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                 Phone Number
@@ -189,7 +206,7 @@ export default function RecordPaymentDialog({
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+91 XXXXX XXXXX"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900"
+                className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900 text-sm"
               />
             </div>
             <div>
@@ -200,15 +217,15 @@ export default function RecordPaymentDialog({
                 type="number"
                 name="totalAmount"
                 value={formData.totalAmount}
-                onChange={handleChange}
+                readOnly
                 placeholder="0"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900 font-bold"
+                className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-default font-bold text-sm"
               />
             </div>
           </div>
 
           {/* Row 3: Paid Amount (Editable) & Outstanding (Read-only) */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                 Amount Paying Now (₹) <span className="text-red-500">*</span>
@@ -218,8 +235,9 @@ export default function RecordPaymentDialog({
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
+                max={formData.totalAmount}
                 placeholder="0"
-                className="w-full px-3 py-2.5 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent bg-green-50 text-gray-900 font-bold"
+                className="w-full px-3 py-2 sm:py-2.5 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent bg-green-50 text-gray-900 font-bold text-sm"
               />
               <p className="text-xs text-green-600 mt-1">Editable - Enter partial or full amount</p>
             </div>
@@ -230,7 +248,7 @@ export default function RecordPaymentDialog({
               <input
                 type="text"
                 value={`₹${calculateOutstanding().toLocaleString("en-IN")}`}
-                className="w-full px-3 py-2.5 border border-red-300 rounded-lg bg-red-50 text-red-700 cursor-default font-bold"
+                className="w-full px-3 py-2 sm:py-2.5 border border-red-300 rounded-lg bg-red-50 text-red-700 cursor-default font-bold text-sm"
                 readOnly
               />
               <p className="text-xs text-red-600 mt-1">Auto-calculated</p>
@@ -238,7 +256,7 @@ export default function RecordPaymentDialog({
           </div>
 
           {/* Row 4: Payment Mode & Date (Editable) */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                 Payment Mode <span className="text-red-500">*</span>
@@ -247,7 +265,7 @@ export default function RecordPaymentDialog({
                 name="mode"
                 value={formData.mode}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white text-gray-900"
+                className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white text-gray-900 text-sm"
               >
                 <option>UPI</option>
                 <option>Cash</option>
@@ -265,7 +283,7 @@ export default function RecordPaymentDialog({
                 name="date"
                 value={formData.date}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white text-gray-900"
+                className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white text-gray-900 text-sm"
               />
             </div>
           </div>
@@ -281,7 +299,7 @@ export default function RecordPaymentDialog({
               value={formData.reference}
               onChange={handleChange}
               placeholder="UPI ref / cheque no. / UTR"
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white text-gray-900"
+              className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white text-gray-900 text-sm"
             />
           </div>
 
@@ -296,14 +314,48 @@ export default function RecordPaymentDialog({
               onChange={handleChange}
               placeholder="Partial payment, advance, etc."
               rows={2}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white resize-none text-gray-900"
+              className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white resize-none text-gray-900 text-sm"
             />
+          </div>
+
+          {/* Payment Summary */}
+          <div className="bg-linear-to-r from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 mt-4 sm:mt-6 border-2 border-blue-200">
+            <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 sm:mb-3">Payment Summary</p>
+
+            <div className="space-y-2">
+              {/* Total Amount */}
+              <div className="flex justify-between items-center gap-2">
+                <span className="text-xs sm:text-sm text-gray-600">Total Amount Due:</span>
+                <span className="text-sm sm:text-lg font-bold text-gray-900 text-right">
+                  ₹{Number(formData.totalAmount || 0).toLocaleString("en-IN")}
+                </span>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-blue-200"></div>
+
+              {/* Partial Amount */}
+              <div className="flex justify-between items-center gap-2">
+                <span className="text-xs sm:text-sm text-green-700 font-semibold">Amount Paying Now:</span>
+                <span className="text-sm sm:text-lg font-black text-green-600 text-right">
+                  ₹{Number(formData.amount || 0).toLocaleString("en-IN")}
+                </span>
+              </div>
+
+              {/* Remaining Balance */}
+              <div className="flex justify-between items-center pt-1 gap-2">
+                <span className="text-xs sm:text-sm text-red-700 font-semibold">Remaining Balance:</span>
+                <span className="text-sm sm:text-lg font-black text-red-600 text-right">
+                  ₹{calculateOutstanding().toLocaleString("en-IN")}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-2 sm:py-3 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 sm:mt-6 text-sm sm:text-base"
           >
             ✓ Save Payment
           </button>

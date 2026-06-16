@@ -17,6 +17,7 @@ interface DocumentPreviewDialogProps {
     service: string;
     base: string;
     gst: string;
+    discount?: string;
     total: string;
     date: string;
     due: string;
@@ -286,6 +287,10 @@ export default function DocumentPreviewDialog({
                       <td colspan="3" style="text-align:right">GST (18%)</td>
                       <td class="amount">${document.gst}</td>
                     </tr>
+                    ${document.discount ? `<tr class="gst-row">
+                      <td colspan="3" style="text-align:right">Discount</td>
+                      <td class="amount" style="color: #DC2626;">-${document.discount}</td>
+                    </tr>` : ''}
                     <tr class="total-row">
                       <td colspan="3" style="text-align:right">TOTAL</td>
                       <td class="amount">${document.total}</td>
@@ -490,6 +495,14 @@ export default function DocumentPreviewDialog({
                         {document.gst.includes('₹') ? document.gst : `₹${document.gst}`}
                       </td>
                     </tr>
+                    {document.discount && (
+                      <tr className="bg-gray-50/50">
+                        <td colSpan={3} className="px-6 py-4 text-right text-sm text-gray-600 font-medium">Discount</td>
+                        <td className="px-6 py-4 text-right text-sm text-red-600 font-semibold">
+                          -{document.discount.includes('₹') ? document.discount : `₹${document.discount}`}
+                        </td>
+                      </tr>
+                    )}
                     <tr className="bg-yellow-50">
                       <td colSpan={3} className="px-6 py-5 text-right font-bold text-gray-900 uppercase tracking-wider">
                         Total

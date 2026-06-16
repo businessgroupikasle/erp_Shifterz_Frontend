@@ -64,6 +64,12 @@ export default function ConvertDocumentDialog({
     const amount = Number(formData.amount);
     const gst = Number(formData.gst) || 0;
     const discountPercent = Number(formData.discount) || 0;
+
+    if (discountPercent > 100) {
+      toast.error("Discount percentage cannot exceed 100%");
+      return;
+    }
+
     const discountAmount = (amount * discountPercent) / 100;
     const total = amount + gst - discountAmount;
 
@@ -125,65 +131,55 @@ export default function ConvertDocumentDialog({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Amount */}
+          {/* Amount - Read Only */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
-              Amount (₹) <span className="text-red-500">*</span>
+              Amount (₹) <span className="text-gray-400">(Fixed)</span>
             </label>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleChange}
-              placeholder="Enter amount"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-              step="0.01"
-              min="0"
-            />
+            <div className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-bold">
+              ₹{Number(formData.amount || 0).toLocaleString("en-IN")}
+            </div>
           </div>
 
-          {/* GST */}
+          {/* GST - Read Only */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
-              GST Amount (₹)
+              GST Amount (₹) <span className="text-gray-400">(Fixed)</span>
             </label>
-            <input
-              type="number"
-              name="gst"
-              value={formData.gst}
-              onChange={handleChange}
-              placeholder="0"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              step="0.01"
-              min="0"
-            />
+            <div className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-bold">
+              ₹{Number(formData.gst || 0).toLocaleString("en-IN")}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Max allowed: ₹{((Number(formData.amount || 0) * 18) / 100).toFixed(2)} (18% of amount)
+            </p>
           </div>
 
-          {/* Discount Percentage */}
+          {/* Discount Percentage - Editable */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
               Discount (%)
             </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                name="discount"
-                value={formData.discount}
-                onChange={handleChange}
-                placeholder="0"
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                step="0.01"
-                min="0"
-                max="100"
-              />
-              <span className="text-sm font-bold text-gray-600">%</span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  name="discount"
+                  value={formData.discount}
+                  onChange={handleChange}
+                  placeholder="0"
+                  className="flex-1 px-4 py-2.5 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-gray-900 font-bold"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                />
+                <span className="text-sm font-bold text-gray-600">%</span>
+              </div>
+              <p className="text-xs text-gray-500">
+                ₹{(
+                  (Number(formData.amount || 0) * Number(formData.discount || 0)) / 100
+                ).toFixed(2)} off
+              </p>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              ₹{(
-                (Number(formData.amount || 0) * Number(formData.discount || 0)) / 100
-              ).toFixed(2)} off
-            </p>
           </div>
 
           {/* Total */}
