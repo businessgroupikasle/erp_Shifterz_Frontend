@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Car, Clock, Calendar, Plus } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { getServices } from "@/lib/api";
 import AddTechnicianDialog from "./AddTechnicianDialog";
 
 interface CarCheckInDialogProps {
@@ -33,6 +34,7 @@ export default function CarCheckInDialog({
   const [currentTime, setCurrentTime] = useState<string>("");
   const [displayTime, setDisplayTime] = useState<string>("");
   const [isAddTechnicianOpen, setIsAddTechnicianOpen] = useState(false);
+  const [services, setServices] = useState<any[]>([]);
   const [technicians, setTechnicians] = useState<string[]>([
     "Arjun",
     "Sathish",
@@ -94,6 +96,43 @@ export default function CarCheckInDialog({
     }
   }, [isOpen, initialData]);
 
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const data = await getServices();
+        setServices(data || []);
+        // Set first service as default if available and no initialData
+        if (data && data.length > 0 && !initialData) {
+          setFormData(prev => ({ ...prev, service: data[0].name }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch services:", err);
+        // Fallback to default services if API fails
+        setServices([
+          { id: "1", name: "PPF Full Body" },
+          { id: "2", name: "PPF Bonnet" },
+          { id: "3", name: "C3 Coating" },
+          { id: "4", name: "Graphene Coating" },
+          { id: "5", name: "Interior Detailing" },
+        ]);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  const formatVehicleNumber = (value: string) => {
+    const cleaned = value.replace(/\s/g, "").toUpperCase();
+    if (cleaned.length === 0) return "";
+
+    let formatted = "";
+    formatted += cleaned.substring(0, 2);
+    if (cleaned.length > 2) formatted += " " + cleaned.substring(2, 4);
+    if (cleaned.length > 4) formatted += " " + cleaned.substring(4, 6);
+    if (cleaned.length > 6) formatted += " " + cleaned.substring(6, 10);
+
+    return formatted;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -103,7 +142,7 @@ export default function CarCheckInDialog({
     if (name === "phone") {
       setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
     } else if (name === "vehicleNumber") {
-      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+      setFormData((prev) => ({ ...prev, [name]: formatVehicleNumber(value) }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -123,6 +162,18 @@ export default function CarCheckInDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate vehicle number format: TN 04 AB 1234
+    const vehicleRegex = /^[A-Z]{2}\s\d{2}\s[A-Z]{1,2}\s\d{1,4}$/;
+    if (!vehicleRegex.test(formData.vehicleNumber)) {
+      toast.error("Vehicle number format: TN 04 AB 1234 (State Code, RTO, Series, Number)");
+      return;
+    }
+
+    if (!formData.odometer || Number(formData.odometer) <= 0) {
+      toast.error("Odometer must be greater than 0");
+      return;
+    }
     if (onSubmit) {
       onSubmit({
         id: initialData?.id || Date.now().toString(),
@@ -246,11 +297,21 @@ export default function CarCheckInDialog({
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white"
               >
-                <option>PPF Full Body</option>
-                <option>PPF Bonnet</option>
-                <option>C3 Coating</option>
-                <option>Graphene Coating</option>
-                <option>Interior Detailing</option>
+                {services.length > 0 ? (
+                  services.map((svc: any) => (
+                    <option key={svc.id} value={svc.name}>
+                      {svc.name}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option>PPF Full Body</option>
+                    <option>PPF Bonnet</option>
+                    <option>C3 Coating</option>
+                    <option>Graphene Coating</option>
+                    <option>Interior Detailing</option>
+                  </>
+                )}
               </select>
             </div>
             <div>
@@ -284,7 +345,7 @@ export default function CarCheckInDialog({
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Odometer (KM)
+                Odometer (KM) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -293,6 +354,8 @@ export default function CarCheckInDialog({
                 onChange={handleChange}
                 placeholder="42500"
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                required
+                min="1"
               />
             </div>
             <div>

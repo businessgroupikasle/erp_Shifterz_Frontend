@@ -2,16 +2,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Edit2, Trash2, Lock } from "lucide-react";
 import AddFranchiseDialog from "@/components/franchise/AddFranchiseDialog";
 import { getFranchises, createFranchise, updateFranchise, deleteFranchise } from "@/lib/api";
 
 export default function FranchisePage() {
+  const router = useRouter();
   const [franchises, setFranchises] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFranchise, setEditingFranchise] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLocked] = useState(true);
+
+  useEffect(() => {
+    if (isLocked) {
+      router.push("/dashboard");
+    }
+  }, [isLocked, router]);
 
   const fetchFranchises = useCallback(async () => {
     try {

@@ -159,8 +159,7 @@ export default function RecordPaymentDialog({
                 value={formData.client}
                 onChange={handleChange}
                 placeholder="Full name"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-default"
-                readOnly
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900"
               />
             </div>
             <div>
@@ -173,8 +172,7 @@ export default function RecordPaymentDialog({
                 value={formData.invoiceNo}
                 onChange={handleChange}
                 placeholder="INV-XXXX"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-default"
-                readOnly
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900"
               />
             </div>
           </div>
@@ -189,8 +187,9 @@ export default function RecordPaymentDialog({
                 type="text"
                 name="phone"
                 value={formData.phone}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-default"
-                readOnly
+                onChange={handleChange}
+                placeholder="+91 XXXXX XXXXX"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900"
               />
             </div>
             <div>
@@ -201,8 +200,9 @@ export default function RecordPaymentDialog({
                 type="number"
                 name="totalAmount"
                 value={formData.totalAmount}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-default font-bold"
-                readOnly
+                onChange={handleChange}
+                placeholder="0"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-gray-900 font-bold"
               />
             </div>
           </div>

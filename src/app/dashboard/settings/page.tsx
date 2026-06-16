@@ -64,6 +64,8 @@ export default function SettingsPage() {
     const { name, value } = e.target;
     if (name === "phone") {
       setCompanyInfo(prev => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
+    } else if (name === "gstin") {
+      setCompanyInfo(prev => ({ ...prev, [name]: value.toUpperCase().slice(0, 15) }));
     } else {
       setCompanyInfo(prev => ({ ...prev, [name]: value }));
     }
@@ -83,20 +85,34 @@ export default function SettingsPage() {
     setIsAddTechnicianOpen(true);
   };
 
-  const handleAddTechnicianSubmit = (technicianData: {
+  const handleAddTechnicianSubmit = async (technicianData: {
     name: string;
     phone: string;
     experience: string;
     specialization: string;
   }) => {
     if (technicianData.name && !technicians.includes(technicianData.name)) {
-      setTechnicians(prev => [...prev, technicianData.name]);
+      const newTechnicians = [...technicians, technicianData.name];
+      setTechnicians(newTechnicians);
+      try {
+        await updateSettings({ companyInfo, technicians: newTechnicians, salesAgents, securityGuards, categories });
+        toast.success("Technician added to database");
+      } catch (err: any) {
+        toast.error("Failed to add technician: " + err.message);
+      }
     }
   };
 
-  const handleRemoveTechnician = (index: number) => {
+  const handleRemoveTechnician = async (index: number) => {
     if (window.confirm("Are you sure you want to remove this technician?")) {
-      setTechnicians(prev => prev.filter((_, i) => i !== index));
+      const newTechnicians = technicians.filter((_, i) => i !== index);
+      setTechnicians(newTechnicians);
+      try {
+        await updateSettings({ companyInfo, technicians: newTechnicians, salesAgents, securityGuards, categories });
+        toast.success("Technician removed from database");
+      } catch (err: any) {
+        toast.error("Failed to remove technician: " + err.message);
+      }
     }
   };
 
@@ -104,19 +120,33 @@ export default function SettingsPage() {
     setIsAddSalesAgentOpen(true);
   };
 
-  const handleAddSalesAgentSubmit = (agentData: {
+  const handleAddSalesAgentSubmit = async (agentData: {
     name: string;
     phone: string;
     email: string;
   }) => {
     if (agentData.name && !salesAgents.includes(agentData.name)) {
-      setSalesAgents(prev => [...prev, agentData.name]);
+      const newSalesAgents = [...salesAgents, agentData.name];
+      setSalesAgents(newSalesAgents);
+      try {
+        await updateSettings({ companyInfo, technicians, salesAgents: newSalesAgents, securityGuards, categories });
+        toast.success("Sales Agent added to database");
+      } catch (err: any) {
+        toast.error("Failed to add Sales Agent: " + err.message);
+      }
     }
   };
 
-  const handleRemoveSalesAgent = (index: number) => {
+  const handleRemoveSalesAgent = async (index: number) => {
     if (window.confirm("Are you sure you want to remove this sales agent?")) {
-      setSalesAgents(prev => prev.filter((_, i) => i !== index));
+      const newSalesAgents = salesAgents.filter((_, i) => i !== index);
+      setSalesAgents(newSalesAgents);
+      try {
+        await updateSettings({ companyInfo, technicians, salesAgents: newSalesAgents, securityGuards, categories });
+        toast.success("Sales Agent removed from database");
+      } catch (err: any) {
+        toast.error("Failed to remove Sales Agent: " + err.message);
+      }
     }
   };
 
@@ -124,19 +154,33 @@ export default function SettingsPage() {
     setIsAddSecurityOpen(true);
   };
 
-  const handleAddSecurityGuardSubmit = (guardData: {
+  const handleAddSecurityGuardSubmit = async (guardData: {
     name: string;
     phone: string;
     shift: string;
   }) => {
     if (guardData.name && !securityGuards.includes(guardData.name)) {
-      setSecurityGuards(prev => [...prev, guardData.name]);
+      const newSecurityGuards = [...securityGuards, guardData.name];
+      setSecurityGuards(newSecurityGuards);
+      try {
+        await updateSettings({ companyInfo, technicians, salesAgents, securityGuards: newSecurityGuards, categories });
+        toast.success("Security Guard added to database");
+      } catch (err: any) {
+        toast.error("Failed to add Security Guard: " + err.message);
+      }
     }
   };
 
-  const handleRemoveSecurityGuard = (index: number) => {
+  const handleRemoveSecurityGuard = async (index: number) => {
     if (window.confirm("Are you sure you want to remove this security guard?")) {
-      setSecurityGuards(prev => prev.filter((_, i) => i !== index));
+      const newSecurityGuards = securityGuards.filter((_, i) => i !== index);
+      setSecurityGuards(newSecurityGuards);
+      try {
+        await updateSettings({ companyInfo, technicians, salesAgents, securityGuards: newSecurityGuards, categories });
+        toast.success("Security Guard removed from database");
+      } catch (err: any) {
+        toast.error("Failed to remove Security Guard: " + err.message);
+      }
     }
   };
 
@@ -232,7 +276,7 @@ export default function SettingsPage() {
               
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">GSTIN</label>
-                <input type="text" name="gstin" value={companyInfo.gstin} onChange={handleCompanyInfoChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-colors" />
+                <input type="text" name="gstin" value={companyInfo.gstin} onChange={handleCompanyInfoChange} maxLength={15} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-colors" />
               </div>
               
               <div className="space-y-1.5">

@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useContext } from "react";
 import {
-  BarChart3,
   Car,
   Ticket,
   Users,
@@ -19,7 +19,10 @@ import {
   Settings,
   Grid3x3,
   LogOut,
+  Lock,
+  X,
 } from "lucide-react";
+import { SidebarContext } from "@/lib/context/SidebarContext";
 
 const sidebarSections = [
   {
@@ -42,7 +45,7 @@ const sidebarSections = [
     items: [
       { label: "Leads", icon: Users, href: "/dashboard/leads" },
       { label: "Customers", icon: Users2, href: "/dashboard/customers" },
-      { label: "Franchise", icon: Building2, href: "/dashboard/franchise" },
+      { label: "Franchise", icon: Building2, href: "/dashboard/franchise", locked: true },
     ],
   },
   {
@@ -74,13 +77,24 @@ const sidebarSections = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { toggleSidebar } = useContext(SidebarContext);
 
   return (
     <aside className="w-64 bg-linear-to-b from-white to-gray-50 border-r border-gray-200 h-screen overflow-y-auto flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200 flex flex-col items-start justify-center min-h-[88px]">
-        <Image src="/logo.svg" alt="Shifterz Logo" width={160} height={50} className="h-10 w-auto mb-1" priority />
-        <p className="text-[10px] text-gray-500 tracking-widest font-bold ml-1">PRO SUITE</p>
+      <div className="p-6 border-b border-gray-200 flex items-start justify-between min-h-[88px]">
+        <div className="flex flex-col items-start justify-center">
+          <Image src="/logo.svg" alt="Shifterz Logo" width={160} height={50} className="h-10 w-auto mb-1" priority />
+          <p className="text-[10px] text-gray-500 tracking-widest font-bold ml-1">PRO SUITE</p>
+        </div>
+        {/* Close button for mobile and tablet */}
+        <button
+          onClick={toggleSidebar}
+          className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          title="Close sidebar"
+        >
+          <X className="w-5 h-5 text-gray-600" />
+        </button>
       </div>
 
       {/* Navigation Sections */}
@@ -94,6 +108,21 @@ export default function Sidebar() {
               {section.items.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
+                const isLocked = (item as any).locked;
+
+                if (isLocked) {
+                  return (
+                    <div
+                      key={item.href}
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 cursor-not-allowed"
+                      title="This section is locked"
+                    >
+                      <Icon className="w-5 h-5 shrink-0" />
+                      <span className="text-sm font-medium flex-1">{item.label}</span>
+                      <Lock className="w-4 h-4 shrink-0 text-red-500" />
+                    </div>
+                  );
+                }
 
                 return (
                   <Link

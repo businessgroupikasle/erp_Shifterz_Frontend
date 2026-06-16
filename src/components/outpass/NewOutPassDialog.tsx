@@ -61,6 +61,19 @@ export default function NewOutPassDialog({
     }
   }, [initialData, isOpen]);
 
+  const formatVehicleNumber = (value: string) => {
+    const cleaned = value.replace(/\s/g, "").toUpperCase();
+    if (cleaned.length === 0) return "";
+
+    let formatted = "";
+    formatted += cleaned.substring(0, 2);
+    if (cleaned.length > 2) formatted += " " + cleaned.substring(2, 4);
+    if (cleaned.length > 4) formatted += " " + cleaned.substring(4, 6);
+    if (cleaned.length > 6) formatted += " " + cleaned.substring(6, 10);
+
+    return formatted;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -70,7 +83,7 @@ export default function NewOutPassDialog({
     if (name === "phone") {
       setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
     } else if (name === "vehicleNumber") {
-      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+      setFormData((prev) => ({ ...prev, [name]: formatVehicleNumber(value) }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -78,6 +91,14 @@ export default function NewOutPassDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate vehicle number format: TN 04 AB 1234
+    const vehicleRegex = /^[A-Z]{2}\s\d{2}\s[A-Z]{1,2}\s\d{1,4}$/;
+    if (!vehicleRegex.test(formData.vehicleNumber)) {
+      toast.error("Vehicle number format: TN 04 AB 1234 (State Code, RTO, Series, Number)");
+      return;
+    }
+
     if (onSubmit) {
       onSubmit({
         vehicle: formData.vehicleNumber,

@@ -3,6 +3,7 @@
 
 import { X, Check, ClipboardList } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
 interface JobData {
   id?: string;
@@ -69,8 +70,29 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData 
 
   if (!mounted || !isOpen) return null;
 
+  const formatVehicleNumber = (value: string) => {
+    const cleaned = value.replace(/\s/g, "").toUpperCase();
+    if (cleaned.length === 0) return "";
+
+    let formatted = "";
+    formatted += cleaned.substring(0, 2);
+    if (cleaned.length > 2) formatted += " " + cleaned.substring(2, 4);
+    if (cleaned.length > 4) formatted += " " + cleaned.substring(4, 6);
+    if (cleaned.length > 6) formatted += " " + cleaned.substring(6, 10);
+
+    return formatted;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate vehicle number format: TN 04 AB 1234
+    const vehicleRegex = /^[A-Z]{2}\s\d{2}\s[A-Z]{1,2}\s\d{1,4}$/;
+    if (!vehicleRegex.test(formData.vehicle)) {
+      toast.error("Vehicle number format: TN 04 AB 1234 (State Code, RTO, Series, Number)");
+      return;
+    }
+
     if (onSave) {
       const dataToSave = {
         ...formData,
@@ -112,7 +134,7 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData 
                 required
                 type="text" 
                 value={formData.vehicle}
-                onChange={e => setFormData({...formData, vehicle: e.target.value.toUpperCase()})}
+                onChange={e => setFormData({...formData, vehicle: formatVehicleNumber(e.target.value)})}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors uppercase"
                 placeholder="TN 04 XX 0000"
               />

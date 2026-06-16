@@ -3,7 +3,8 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Circle, Edit } from "lucide-react";
+import { Plus, Eye, Circle, Edit, Download } from "lucide-react";
+import { toast } from "react-hot-toast";
 import CarCheckInDialog from "@/components/carin/CarCheckInDialog";
 import PassCarDialog from "@/components/carin/PassCarDialog";
 import CarDetailsDialog from "@/components/carin/CarDetailsDialog";
@@ -143,6 +144,137 @@ export default function CarInOutPage() {
     return <Circle className="w-3 h-3 fill-current" />;
   };
 
+  const downloadReport = (format: "csv" | "pdf") => {
+    try {
+      const dataToExport = filteredCars.length > 0 ? filteredCars : cars;
+
+      if (format === "csv") {
+        // CSV Download
+        const headers = [
+          "Entry ID",
+          "Vehicle No",
+          "Model",
+          "Customer",
+          "Phone",
+          "Service",
+          "Technician",
+          "In Time",
+          "Out Time",
+          "Duration",
+          "Status",
+        ];
+
+        const rows = dataToExport.map((car) => [
+          car.entryId,
+          car.vehicleNo,
+          car.model,
+          car.customer,
+          car.phone,
+          car.service,
+          car.technician,
+          car.inTime,
+          car.outTime || "-",
+          car.duration || "-",
+          car.status,
+        ]);
+
+        const csvContent = [
+          headers.join(","),
+          ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `car-in-report-${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        toast.success("Report downloaded as CSV");
+      } else if (format === "pdf") {
+        // PDF Download (simple HTML-based)
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Car In/Out Report</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              h1 { color: #333; text-align: center; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+              th { background-color: #f8f9fa; font-weight: bold; }
+              tr:nth-child(even) { background-color: #f9f9f9; }
+              .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
+            </style>
+          </head>
+          <body>
+            <h1>Car In/Out Report</h1>
+            <p style="text-align: center; color: #666;">Generated on ${new Date().toLocaleString()}</p>
+            <p style="text-align: center; color: #666;">Filter: ${filter}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Entry ID</th>
+                  <th>Vehicle No</th>
+                  <th>Model</th>
+                  <th>Customer</th>
+                  <th>Service</th>
+                  <th>Technician</th>
+                  <th>In Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${dataToExport
+                  .map(
+                    (car) => `
+                  <tr>
+                    <td>${car.entryId}</td>
+                    <td>${car.vehicleNo}</td>
+                    <td>${car.model}</td>
+                    <td>${car.customer}</td>
+                    <td>${car.service}</td>
+                    <td>${car.technician}</td>
+                    <td>${car.inTime}</td>
+                    <td>${car.status}</td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+            <div class="footer">
+              <p>© Shifterz ERP System - ${new Date().getFullYear()}</p>
+            </div>
+          </body>
+          </html>
+        `;
+
+        const blob = new Blob([htmlContent], { type: "text/html" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `car-in-report-${new Date().toISOString().split("T")[0]}.html`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        toast.success("Report downloaded as HTML (can be printed as PDF)");
+      }
+    } catch (err) {
+      toast.error("Failed to download report");
+      console.error(err);
+    }
+  };
+
+  const filteredCars = cars.filter((car) => {
+    if (filter === "All") return true;
+    if (filter === "In Workshop") return car.status === "Ongoing" || car.status === "In Workshop";
+    if (filter === "Delivered") return car.status === "Out" || car.status === "Delivered";
+    return true;
+  });
+
   return (
     <div className="p-8">
       {/* Stats Bar */}
@@ -156,7 +288,31 @@ export default function CarInOutPage() {
         <div className="flex items-center gap-2">
           <span className="text-purple-600 font-semibold">Delivered: {delivered}</span>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex gap-3">
+          <div className="relative group">
+            <button
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Download className="w-5 h-5" />
+              Download
+            </button>
+            <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg hidden group-hover:block z-50">
+              <button
+                onClick={() => downloadReport("csv")}
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
+              >
+                <Download className="w-4 h-4" />
+                Download as CSV
+              </button>
+              <button
+                onClick={() => downloadReport("pdf")}
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download as PDF
+              </button>
+            </div>
+          </div>
           <button
             onClick={() => { setSelectedCar(null); setIsDialogOpen(true); }}
             className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
@@ -226,7 +382,7 @@ export default function CarInOutPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {cars.map((entry) => (
+              {filteredCars.map((entry) => (
                 <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     {entry.entryId || entry.id}

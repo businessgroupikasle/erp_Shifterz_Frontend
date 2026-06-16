@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell, Settings, User, LogOut, Clock } from "lucide-react";
+import { Bell, Settings, User, LogOut, Clock, Menu } from "lucide-react";
 import { getSettings } from "@/lib/api";
+import { SidebarContext } from "@/lib/context/SidebarContext";
 
 const pageHeaders: Record<string, { title: string; description: string }> = {
   "/dashboard": {
@@ -73,6 +74,8 @@ function getCurrentTime(): string {
 
 export default function Header() {
   const pathname = usePathname();
+  const sidebarContext = useContext(SidebarContext);
+  const toggleSidebar = sidebarContext?.toggleSidebar || (() => {});
   const [currentTime, setCurrentTime] = useState<string>("");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [companyInitials, setCompanyInitials] = useState("AD");
@@ -112,11 +115,21 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="px-8 py-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{pageInfo.title}</h1>
-          <p className="text-sm text-gray-500 mt-1">{pageInfo.description}</p>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggleSidebar}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors lg:hidden"
+            title="Toggle sidebar"
+            aria-label="Toggle sidebar"
+          >
+            <Menu className="w-6 h-6 text-gray-600" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{pageInfo.title}</h1>
+            <p className="text-sm text-gray-500 mt-1">{pageInfo.description}</p>
+          </div>
         </div>
 
         <div className="flex items-center gap-6">

@@ -24,6 +24,19 @@ export default function AddCustomerDialog({
     carModel: "",
   });
 
+  const formatVehicleNumber = (value: string) => {
+    const cleaned = value.replace(/\s/g, "").toUpperCase();
+    if (cleaned.length === 0) return "";
+
+    let formatted = "";
+    formatted += cleaned.substring(0, 2);
+    if (cleaned.length > 2) formatted += " " + cleaned.substring(2, 4);
+    if (cleaned.length > 4) formatted += " " + cleaned.substring(4, 6);
+    if (cleaned.length > 6) formatted += " " + cleaned.substring(6, 10);
+
+    return formatted;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -31,7 +44,7 @@ export default function AddCustomerDialog({
     if (name === "phone") {
       setFormData((prev) => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
     } else if (name === "vehicle") {
-      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+      setFormData((prev) => ({ ...prev, [name]: formatVehicleNumber(value) }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -40,8 +53,17 @@ export default function AddCustomerDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      alert("Customer name is required");
+      toast.error("Customer name is required");
       return;
+    }
+
+    // Validate vehicle number format if provided: TN 04 AB 1234
+    if (formData.vehicle.trim()) {
+      const vehicleRegex = /^[A-Z]{2}\s\d{2}\s[A-Z]{1,2}\s\d{1,4}$/;
+      if (!vehicleRegex.test(formData.vehicle)) {
+        toast.error("Vehicle number format: TN 04 AB 1234 (State Code, RTO, Series, Number)");
+        return;
+      }
     }
 
     if (onSubmit) {

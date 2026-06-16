@@ -2,11 +2,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
-import { Plus, Eye, Check, Trash2, Search, Receipt } from "lucide-react";
+import { Plus, Eye, Check, Trash2, Search, Receipt, ArrowRight } from "lucide-react";
 import NewDocumentDialog from "@/components/billing/NewDocumentDialog";
 import DocumentPreviewDialog from "@/components/billing/DocumentPreviewDialog";
+import ConvertDocumentDialog from "@/components/billing/ConvertDocumentDialog";
 import RecordPaymentDialog from "@/components/payments/RecordPaymentDialog";
 import PaymentReceiptDialog from "@/components/payments/PaymentReceiptDialog";
+import { toast } from "react-hot-toast";
 import { getInvoices, createInvoice, updateInvoice, deleteInvoice, createPayment } from "@/lib/api";
 
 interface BillingDocument {
@@ -39,9 +41,11 @@ export default function BillingPage() {
   const [filter, setFilter] = useState("All");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isConvertOpen, setIsConvertOpen] = useState(false);
   const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
   const [isPaymentReceiptOpen, setIsPaymentReceiptOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<BillingDocument | null>(null);
+  const [documentToConvert, setDocumentToConvert] = useState<BillingDocument | null>(null);
   const [documentToMarkPaid, setDocumentToMarkPaid] = useState<BillingDocument | null>(null);
   const [selectedPaymentDocument, setSelectedPaymentDocument] = useState<BillingDocument | null>(null);
 
@@ -93,8 +97,6 @@ export default function BillingPage() {
         return "bg-purple-100 text-purple-700";
       case "Quotation":
         return "bg-blue-100 text-blue-700";
-      case "Proforma":
-        return "bg-indigo-100 text-indigo-700";
       case "Estimate":
         return "bg-orange-100 text-orange-700";
       default:
@@ -132,6 +134,36 @@ export default function BillingPage() {
     if (doc && doc.status !== "Paid") {
       setDocumentToMarkPaid(doc);
       setIsRecordPaymentOpen(true);
+    }
+  };
+
+  const handleConvertDocument = async (convertedData: any) => {
+    try {
+      const newDoc = {
+        ...convertedData,
+        id: `${convertedData.type.substring(0, 3).toUpperCase()}-${Date.now()}`,
+      };
+
+      // Add new converted document
+      await createInvoice(newDoc);
+
+      // Mark original as converted
+      const updatedOriginal = {
+        ...documentToConvert,
+        status: "Converted",
+        convertedTo: newDoc.id,
+      };
+      await updateInvoice(documentToConvert?.id || "", updatedOriginal);
+
+      // Refresh documents
+      await fetchInvoices();
+
+      toast.success(`Document converted to ${convertedData.type}`);
+      setIsConvertOpen(false);
+      setDocumentToConvert(null);
+    } catch (err: any) {
+      toast.error("Failed to convert document: " + err.message);
+      console.error(err);
     }
   };
 
@@ -215,7 +247,7 @@ export default function BillingPage() {
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
-            {["All", "Invoice", "Quotation", "Estimate", "Proforma"].map((tab) => (
+            {["All", "Invoice", "Quotation", "Estimate"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
@@ -347,6 +379,18 @@ export default function BillingPage() {
                           <Receipt className="w-4 h-4 text-blue-600" />
                         </button>
                       )}
+                      {(doc.type === "Estimate" || doc.type === "Quotation") && doc.status !== "Paid" && (
+                        <button
+                          onClick={() => {
+                            setDocumentToConvert(doc);
+                            setIsConvertOpen(true);
+                          }}
+                          className="p-1 hover:bg-blue-100 rounded transition-colors"
+                          title={`Convert to ${doc.type === "Estimate" ? "Quotation" : "Invoice"}`}
+                        >
+                          <ArrowRight className="w-4 h-4 text-blue-600" />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDeleteDocument(doc.id)}
                         className="p-1 hover:bg-red-100 rounded transition-colors"
@@ -392,6 +436,15 @@ export default function BillingPage() {
           deliveryTerms: selectedDocument.deliveryTerms,
           authorizedSignatory: selectedDocument.authorizedSignatory
         } : undefined}
+      />
+      <ConvertDocumentDialog
+        isOpen={isConvertOpen}
+        onClose={() => {
+          setIsConvertOpen(false);
+          setDocumentToConvert(null);
+        }}
+        onSubmit={handleConvertDocument}
+        document={documentToConvert || undefined}
       />
       <RecordPaymentDialog
         isOpen={isRecordPaymentOpen}
