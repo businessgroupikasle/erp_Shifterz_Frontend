@@ -31,8 +31,12 @@ export default function LoginPage() {
 
       if (response.token) {
         // Token is automatically stored in localStorage by login function
-        // Redirect to dashboard
-        router.push("/dashboard");
+        // Redirect based on role
+        if (response.user && response.user.role === "technician") {
+          router.push("/technician");
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (err: any) {
       setError(err.message || "Invalid username or password");

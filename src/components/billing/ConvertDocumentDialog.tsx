@@ -35,10 +35,15 @@ export default function ConvertDocumentDialog({
 
   useEffect(() => {
     if (document && isOpen) {
+      // Convert discount amount back to percentage for display
+      const discountPercent = document.discount && document.amount
+        ? ((document.discount / document.amount) * 100).toFixed(2)
+        : "";
+
       setFormData({
         amount: document.amount || "",
         gst: document.gst || "",
-        discount: document.discount || "",
+        discount: discountPercent,
       });
     }
   }, [isOpen, document]);
@@ -157,7 +162,7 @@ export default function ConvertDocumentDialog({
           {/* Discount Percentage - Editable */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
-              Discount (%)
+              Discount (%) - From Original Document
             </label>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -174,10 +179,13 @@ export default function ConvertDocumentDialog({
                 />
                 <span className="text-sm font-bold text-gray-600">%</span>
               </div>
-              <p className="text-xs text-gray-500">
-                ₹{(
+              <p className="text-xs text-green-600 font-semibold">
+                ✓ Amount off: ₹{(
                   (Number(formData.amount || 0) * Number(formData.discount || 0)) / 100
-                ).toFixed(2)} off
+                ).toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-400 italic">
+                Discount percentage carried from original document
               </p>
             </div>
           </div>

@@ -154,7 +154,17 @@ export default function BillingPage() {
       };
       const docTypePrefix = docTypeMap[convertedData.type] || "DOC";
 
-      const newDocId = `${docTypePrefix}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
+      // Get the next sequential ID based on document type
+      let maxId = 0;
+      const relevantDocs = documents.filter((doc) => doc.id?.startsWith(docTypePrefix));
+      relevantDocs.forEach((doc) => {
+        const numStr = doc.id.replace(docTypePrefix, "");
+        const num = parseInt(numStr, 10);
+        if (!isNaN(num) && num > maxId) {
+          maxId = num;
+        }
+      });
+      const newDocId = `${docTypePrefix}${String(maxId + 1).padStart(3, "0")}`;
 
       const newDoc = {
         ...convertedData,
@@ -440,7 +450,7 @@ export default function BillingPage() {
                           )}
                         </>
                       )}
-                      {(doc.type === "Estimate" || doc.type === "Quotation") && doc.status !== "Paid" && (
+                      {(doc.type === "Estimate" || doc.type === "Quotation") && doc.status !== "Paid" && doc.status !== "Converted" && (
                         <button
                           onClick={() => {
                             setDocumentToConvert(doc);
@@ -474,6 +484,7 @@ export default function BillingPage() {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSubmit={handleAddInvoice}
+        existingDocuments={documents}
       />
       <DocumentPreviewDialog
         isOpen={isPreviewOpen}

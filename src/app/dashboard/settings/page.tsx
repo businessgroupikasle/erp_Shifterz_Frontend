@@ -18,7 +18,7 @@ export default function SettingsPage() {
     gstPercent: "18"
   });
 
-  const [technicians, setTechnicians] = useState<string[]>([]);
+  const [technicians, setTechnicians] = useState<any[]>([]);
   const [salesAgents, setSalesAgents] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,10 +46,19 @@ export default function SettingsPage() {
         const data = await getSettings();
         if (data) {
           setCompanyInfo(prev => data.companyInfo || prev);
-          setTechnicians(data.technicians || []);
           setSalesAgents(data.salesAgents || []);
           setSecurityGuards(data.securityGuards || []);
           setCategories(data.categories || []);
+        }
+        
+        // Fetch technicians directly
+        const token = localStorage.getItem("token");
+        const techsRes = await fetch(process.env.NEXT_PUBLIC_API_URL + "/technicians" || "http://localhost:5000/api/technicians", {
+          headers: { ...(token && { Authorization: `Bearer ${token}` }) }
+        });
+        if (techsRes.ok) {
+          const techsData = await techsRes.json();
+          setTechnicians(techsData);
         }
       } catch (err) {
         console.error("Failed to fetch settings:", err);
@@ -73,7 +82,8 @@ export default function SettingsPage() {
 
   const handleSaveSettings = async () => {
     try {
-      await updateSettings({ companyInfo, technicians, salesAgents, securityGuards, categories });
+      // Exclude technicians from global settings update
+      await updateSettings({ companyInfo, salesAgents, securityGuards, categories });
       toast.success("Settings saved successfully!");
     } catch (err: any) {
       console.error("Failed to save settings:", err);
@@ -88,27 +98,45 @@ export default function SettingsPage() {
   const handleAddTechnicianSubmit = async (technicianData: {
     name: string;
     phone: string;
+    email: string;
     experience: string;
     specialization: string;
   }) => {
-    if (technicianData.name && !technicians.includes(technicianData.name)) {
-      const newTechnicians = [...technicians, technicianData.name];
-      setTechnicians(newTechnicians);
-      try {
-        await updateSettings({ companyInfo, technicians: newTechnicians, salesAgents, securityGuards, categories });
-        toast.success("Technician added to database");
-      } catch (err: any) {
-        toast.error("Failed to add technician: " + err.message);
-      }
+    if (!technicianData.name) return;
+    
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/technicians" || "http://localhost:5000/api/technicians", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }) 
+        },
+        body: JSON.stringify(technicianData)
+      });
+      if (!res.ok) throw new Error("Failed to add technician");
+      
+      const newTech = await res.json();
+      setTechnicians([...technicians, newTech]);
+      toast.success("Technician added to database");
+    } catch (err: any) {
+      toast.error("Failed to add technician: " + err.message);
     }
   };
 
   const handleRemoveTechnician = async (index: number) => {
     if (window.confirm("Are you sure you want to remove this technician?")) {
-      const newTechnicians = technicians.filter((_, i) => i !== index);
-      setTechnicians(newTechnicians);
+      const techToRemove = technicians[index];
       try {
-        await updateSettings({ companyInfo, technicians: newTechnicians, salesAgents, securityGuards, categories });
+        const token = localStorage.getItem("token");
+        const res = await fetch((process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api") + `/technicians/${techToRemove.id}`, {
+          method: "DELETE",
+          headers: { ...(token && { Authorization: `Bearer ${token}` }) }
+        });
+        if (!res.ok) throw new Error("Failed to delete technician");
+        
+        const newTechnicians = technicians.filter((_, i) => i !== index);
+        setTechnicians(newTechnicians);
         toast.success("Technician removed from database");
       } catch (err: any) {
         toast.error("Failed to remove technician: " + err.message);
@@ -309,11 +337,14 @@ export default function SettingsPage() {
                 <div className="py-8 text-center text-sm text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-200">No technicians added yet.</div>
               ) : (
                 <div className="grid grid-cols-1 gap-2">
-                  {technicians.map((name, i) => (
+                  {technicians.map((tech, i) => (
                     <div key={i} className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 font-bold text-xs uppercase">{name.substring(0, 2)}</div>
-                        <span className="text-sm font-bold text-gray-800">{name}</span>
+                        <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 font-bold text-xs uppercase">{tech.name.substring(0, 2)}</div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-gray-800">{tech.name}</span>
+                          {tech.email && <span className="text-xs text-gray-500">{tech.email}</span>}
+                        </div>
                       </div>
                       <button onClick={() => handleRemoveTechnician(i)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition-colors">
                         <Trash2 className="w-4 h-4" />

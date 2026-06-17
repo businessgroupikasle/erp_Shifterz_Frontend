@@ -10,6 +10,7 @@ interface NewDocumentDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (doc: any) => void;
+  existingDocuments?: any[];
 }
 
 const COMMON_SERVICES = [
@@ -29,8 +30,10 @@ export default function NewDocumentDialog({
   isOpen,
   onClose,
   onSubmit,
+  existingDocuments = [],
 }: NewDocumentDialogProps) {
   const [focusedItemIndex, setFocusedItemIndex] = useState<number | null>(null);
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
   const [formData, setFormData] = useState({
     type: "Estimate",
     status: "Pending",
@@ -100,9 +103,17 @@ export default function NewDocumentDialog({
 
   useEffect(() => {
     if (isOpen) {
+      setIsLoadingServices(true);
       getServices()
-        .then((data) => setAvailableServices(data))
-        .catch((err) => console.error("Failed to load services:", err));
+        .then((data) => {
+          setAvailableServices(Array.isArray(data) ? data : []);
+          setIsLoadingServices(false);
+        })
+        .catch((err) => {
+          console.error("Failed to load services:", err);
+          setAvailableServices([]);
+          setIsLoadingServices(false);
+        });
     }
   }, [isOpen]);
 
@@ -190,7 +201,17 @@ export default function NewDocumentDialog({
         Estimate: "EST",
       }[formData.type] || "DOC";
 
-      const docNo = `${docTypePrefix}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
+      // Get the next sequential ID based on document type
+      let maxId = 0;
+      const relevantDocs = existingDocuments.filter((doc) => doc.id?.startsWith(docTypePrefix));
+      relevantDocs.forEach((doc) => {
+        const numStr = doc.id.replace(docTypePrefix, "");
+        const num = parseInt(numStr, 10);
+        if (!isNaN(num) && num > maxId) {
+          maxId = num;
+        }
+      });
+      const docNo = `${docTypePrefix}${String(maxId + 1).padStart(3, "0")}`;
 
       const newDoc = {
         type: formData.type,
@@ -222,8 +243,8 @@ export default function NewDocumentDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl shadow-xl max-h-[95vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl shadow-xl max-h-[95vh] overflow-y-auto my-auto">
         <div className="flex items-center justify-between mb-4 sm:mb-6 sticky top-0 bg-white z-10 pb-3 sm:pb-4 border-b">
           <div className="flex items-center gap-2 sm:gap-3">
             <FileText className="w-5 sm:w-6 h-5 sm:h-6 text-yellow-500" />
@@ -372,58 +393,64 @@ export default function NewDocumentDialog({
               </button>
             </div>
 
-            <div className="space-y-2 sm:space-y-3 overflow-x-auto">
+            <div className="space-y-2 sm:space-y-3">
               {items.map((item, index) => (
-                <div key={index} className="flex gap-2 sm:gap-3 lg:gap-4 items-start min-w-min sm:min-w-full">
-                  <div className="flex-grow relative min-w-0">
+                <div key={index} className="flex gap-2 sm:gap-3 lg:gap-4 items-start">
+                  <div className="flex-grow relative">
                     <input
                       type="text"
+                      data-item-index={index}
                       value={item.desc}
                       onChange={(e) => handleItemChange(index, "desc", e.target.value)}
                       onFocus={() => setFocusedItemIndex(index)}
                       onBlur={() => setTimeout(() => setFocusedItemIndex(null), 200)}
                       placeholder="Service Description"
-                      className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none text-sm"
+                      className="w-full px-2 sm:px-3 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none text-sm"
                       required
                       autoComplete="off"
                     />
                     {focusedItemIndex === index && (
-                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto top-full left-0">
-                        {availableServices.length > 0 
-                          ? availableServices.filter(s => s.name.toLowerCase().includes(item.desc.toLowerCase())).map((service) => (
-                              <div
-                                key={service.id}
-                                className="px-4 py-2.5 hover:bg-yellow-50 cursor-pointer text-sm text-gray-700 font-medium transition-colors border-b border-gray-50 last:border-0"
-                                onClick={() => {
-                                  const newItems = [...items];
-                                  newItems[index].desc = service.name;
-                                  newItems[index].price = service.price || 0;
-                                  newItems[index].amount = newItems[index].qty * (service.price || 0);
-                                  setItems(newItems);
-                                  setFocusedItemIndex(null);
-                                }}
-                              >
-                                {service.name} (₹{service.price?.toLocaleString("en-IN") || 0})
-                              </div>
-                            ))
-                          : COMMON_SERVICES.filter(s => s.toLowerCase().includes(item.desc.toLowerCase())).map((service) => (
-                              <div
-                                key={service}
-                                className="px-4 py-2.5 hover:bg-yellow-50 cursor-pointer text-sm text-gray-700 font-medium transition-colors border-b border-gray-50 last:border-0"
-                                onClick={() => {
-                                  handleItemChange(index, "desc", service);
-                                  setFocusedItemIndex(null);
-                                }}
-                              >
-                                {service}
-                              </div>
-                            ))}
-                        {item.desc && !availableServices.some(s => s.name.toLowerCase() === item.desc.toLowerCase()) && !COMMON_SERVICES.some(s => s.toLowerCase() === item.desc.toLowerCase()) && (
-                          <div
-                            className="px-4 py-2.5 bg-gray-50 text-sm text-gray-500 font-medium border-t border-gray-100"
-                          >
-                            Press Enter or click away to use "{item.desc}"
+                      <div className="absolute z-50 w-full mt-1 bg-white border-2 border-yellow-400 rounded-lg shadow-2xl max-h-56 overflow-y-auto top-full left-0"
+                      >
+                        {isLoadingServices ? (
+                          <div className="px-4 py-4 text-sm text-gray-600 text-center font-medium">
+                            <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
+                            Loading services...
                           </div>
+                        ) : availableServices.length === 0 ? (
+                          <div className="px-4 py-4 text-sm text-gray-500 text-center">
+                            No services available
+                          </div>
+                        ) : (
+                          <>
+                            {/* Show database services only */}
+                            {availableServices
+                              .filter(s => !item.desc || s.name.toLowerCase().includes(item.desc.toLowerCase()))
+                              .map((service) => (
+                                <div
+                                  key={service.id}
+                                  className="px-4 py-3 hover:bg-yellow-100 cursor-pointer text-sm text-gray-800 font-semibold transition-colors border-b border-gray-100 last:border-0 bg-yellow-50/50"
+                                  onClick={() => {
+                                    const newItems = [...items];
+                                    newItems[index].desc = service.name;
+                                    newItems[index].price = service.price || 0;
+                                    newItems[index].amount = newItems[index].qty * (service.price || 0);
+                                    setItems(newItems);
+                                    setFocusedItemIndex(null);
+                                  }}
+                                >
+                                  <div className="font-bold text-gray-900">{service.name}</div>
+                                  <div className="text-xs text-gray-600">₹{service.price?.toLocaleString("en-IN") || 0}</div>
+                                </div>
+                              ))}
+
+                            {/* Message when no matches */}
+                            {item.desc && availableServices.filter(s => s.name.toLowerCase().includes(item.desc.toLowerCase())).length === 0 && (
+                              <div className="px-4 py-3 bg-gray-50 text-sm text-gray-500 font-medium border-t border-gray-100">
+                                No services match "{item.desc}"
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     )}

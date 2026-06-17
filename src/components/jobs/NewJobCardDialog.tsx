@@ -11,6 +11,7 @@ interface JobData {
   customer: string;
   service: string;
   technician: string;
+  technicianId?: string;
   priority: string;
   status: string;
   startDate: string;
@@ -18,6 +19,13 @@ interface JobData {
   actualCompletion: string;
   notes: string;
 }
+
+// Hardcoded technician mapping - can be fetched from API later
+const TECHNICIANS = [
+  { id: "TECH001", name: "Arjun" },
+  { id: "TECH002", name: "Sathish" },
+  { id: "TECH003", name: "Mani" },
+];
 
 interface NewJobCardDialogProps {
   isOpen: boolean;
@@ -166,14 +174,22 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData 
             
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Technician</label>
-              <select 
+              <select
                 value={formData.technician}
-                onChange={e => setFormData({...formData, technician: e.target.value})}
+                onChange={(e) => {
+                  const selected = TECHNICIANS.find(t => t.name === e.target.value);
+                  setFormData({
+                    ...formData,
+                    technician: e.target.value,
+                    technicianId: selected?.id || ""
+                  });
+                }}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors"
               >
-                <option value="Arjun">Arjun</option>
-                <option value="Sathish">Sathish</option>
-                <option value="Mani">Mani</option>
+                <option value="">Select Technician</option>
+                {TECHNICIANS.map((tech) => (
+                  <option key={tech.id} value={tech.name}>{tech.name}</option>
+                ))}
               </select>
             </div>
             

@@ -9,7 +9,10 @@ interface AddTechnicianDialogProps {
   onClose: () => void;
   onSubmit?: (technicianData: {
     name: string;
+    email: string;
     phone: string;
+    username?: string;
+    password?: string;
     experience: string;
     specialization: string;
   }) => void;
@@ -22,7 +25,10 @@ export default function AddTechnicianDialog({
 }: AddTechnicianDialogProps) {
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     phone: "",
+    username: "",
+    password: "",
     experience: "1-2 years",
     specialization: "PPF",
   });
@@ -47,7 +53,10 @@ export default function AddTechnicianDialog({
     }
     setFormData({
       name: "",
+      email: "",
       phone: "",
+      username: "",
+      password: "",
       experience: "1-2 years",
       specialization: "PPF",
     });
@@ -89,6 +98,21 @@ export default function AddTechnicianDialog({
             />
           </div>
 
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="technician@example.com"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+            />
+          </div>
+
           {/* Phone */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -109,6 +133,38 @@ export default function AddTechnicianDialog({
                 toast.error("Phone number must be exactly 10 digits");
               }}
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Username */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Username <span className="text-gray-400 text-xs font-normal">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="Auto-generated if empty"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm"
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Password <span className="text-gray-400 text-xs font-normal">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Defaults to 'tech123'"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm"
+              />
+            </div>
           </div>
 
           {/* Experience */}

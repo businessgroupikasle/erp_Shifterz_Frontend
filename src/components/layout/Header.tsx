@@ -60,6 +60,10 @@ const pageHeaders: Record<string, { title: string; description: string }> = {
     title: "Settings",
     description: "Configure your settings",
   },
+  "/technician": {
+    title: "Technician Portal",
+    description: "Manage your assigned jobs",
+  },
 };
 
 function getCurrentTime(): string {

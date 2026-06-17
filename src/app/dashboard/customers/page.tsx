@@ -162,6 +162,7 @@ export default function CustomersPage() {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSubmit={handleAddCustomer}
+        existingCustomers={customers}
       />
     </div>
   );

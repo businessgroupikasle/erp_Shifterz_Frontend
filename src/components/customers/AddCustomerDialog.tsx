@@ -9,12 +9,14 @@ interface AddCustomerDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (customer: any) => void;
+  existingCustomers?: any[];
 }
 
 export default function AddCustomerDialog({
   isOpen,
   onClose,
   onSubmit,
+  existingCustomers = [],
 }: AddCustomerDialogProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -64,6 +66,15 @@ export default function AddCustomerDialog({
         toast.error("Vehicle number format: TN 04 AB 1234 (State Code, RTO, Series, Number)");
         return;
       }
+
+      // Check for duplicate vehicle number
+      const isDuplicate = existingCustomers.some(
+        (customer) => customer.vehicle?.toUpperCase() === formData.vehicle.toUpperCase()
+      );
+      if (isDuplicate) {
+        toast.error("❌ This vehicle number already exists! Customer with this vehicle is already registered.");
+        return;
+      }
     }
 
     if (onSubmit) {
@@ -83,27 +94,27 @@ export default function AddCustomerDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 w-full max-w-xs sm:max-w-sm md:max-w-md shadow-2xl max-h-[95vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-yellow-400 p-2 rounded-lg">
-              <Users className="w-6 h-6 text-gray-900" />
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="bg-yellow-400 p-1.5 sm:p-2 rounded-lg">
+              <Users className="w-5 sm:w-6 h-5 sm:h-6 text-gray-900" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Add Customer</h2>
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Add Customer</h2>
           </div>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            <X className="w-5 sm:w-6 h-5 sm:h-6 text-gray-600" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {/* Row 1: Name & Phone */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                 Name <span className="text-red-500">*</span>
@@ -141,7 +152,7 @@ export default function AddCustomerDialog({
           </div>
 
           {/* Row 2: Email & Vehicle No */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                 Email
@@ -188,7 +199,7 @@ export default function AddCustomerDialog({
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-2 sm:py-3 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 sm:mt-6 text-sm sm:text-base"
           >
             ✓ Save
           </button>
