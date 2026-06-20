@@ -22,9 +22,9 @@ interface JobData {
 
 // Hardcoded technician mapping - can be fetched from API later
 const TECHNICIANS = [
-  { id: "TECH001", name: "Arjun" },
-  { id: "TECH002", name: "Sathish" },
-  { id: "TECH003", name: "Mani" },
+  { id: "TECH-001", name: "Arjun" },
+  { id: "TECH-002", name: "Sathish" },
+  { id: "TECH-003", name: "Mani" },
 ];
 
 interface NewJobCardDialogProps {
