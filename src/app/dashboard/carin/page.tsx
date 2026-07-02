@@ -3,7 +3,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Circle, Edit, Download } from "lucide-react";
+import { Plus, Eye, Circle, Edit, Download, Check, Briefcase } from "lucide-react";
 import { toast } from "react-hot-toast";
 import CarCheckInDialog from "@/components/carin/CarCheckInDialog";
 import PassCarDialog from "@/components/carin/PassCarDialog";
@@ -37,6 +37,7 @@ export default function CarInOutPage() {
   const [selectedCar, setSelectedCar] = useState<CarEntry | null>(null);
   const [cars, setCars] = useState<CarEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [successCar, setSuccessCar] = useState<CarEntry | null>(null);
 
   const fetchCars = useCallback(async () => {
     try {
@@ -64,6 +65,7 @@ export default function CarInOutPage() {
         // Create Mode
         const newCar = await createCarIn(carData);
         setCars([...cars, newCar]);
+        setSuccessCar(newCar);
       }
       setIsDialogOpen(false);
       setSelectedCar(null);
@@ -96,10 +98,10 @@ export default function CarInOutPage() {
         cars.map((car) =>
           car.id === selectedCar.id
             ? {
-                ...car,
-                status: "Out" as const,
-                outTime: passData.outTime,
-              }
+              ...car,
+              status: "Out" as const,
+              outTime: passData.outTime,
+            }
             : car
         )
       );
@@ -228,8 +230,8 @@ export default function CarInOutPage() {
               </thead>
               <tbody>
                 ${dataToExport
-                  .map(
-                    (car) => `
+            .map(
+              (car) => `
                   <tr>
                     <td>${car.entryId}</td>
                     <td>${car.vehicleNo}</td>
@@ -241,8 +243,8 @@ export default function CarInOutPage() {
                     <td>${car.status}</td>
                   </tr>
                 `
-                  )
-                  .join("")}
+            )
+            .join("")}
               </tbody>
             </table>
             <div class="footer">
@@ -329,11 +331,10 @@ export default function CarInOutPage() {
           <button
             key={tab}
             onClick={() => setFilter(tab)}
-            className={`px-4 py-3 font-medium transition-colors ${
-              filter === tab
-                ? "text-gray-900 border-b-2 border-gray-900"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
+            className={`px-4 py-3 font-medium transition-colors ${filter === tab
+              ? "text-gray-900 border-b-2 border-gray-900"
+              : "text-gray-600 hover:text-gray-900"
+              }`}
           >
             {tab}
           </button>
@@ -460,13 +461,13 @@ export default function CarInOutPage() {
         carData={
           selectedCar
             ? {
-                vehicleNo: selectedCar.vehicleNo,
-                model: selectedCar.model,
-                customer: selectedCar.customer,
-                phone: selectedCar.phone,
-                service: selectedCar.service,
-                technician: selectedCar.technician,
-              }
+              vehicleNo: selectedCar.vehicleNo,
+              model: selectedCar.model,
+              customer: selectedCar.customer,
+              phone: selectedCar.phone,
+              service: selectedCar.service,
+              technician: selectedCar.technician,
+            }
             : undefined
         }
         onSubmit={handlePassSubmit}
@@ -476,6 +477,39 @@ export default function CarInOutPage() {
         onClose={() => setIsDetailsDialogOpen(false)}
         carData={selectedCar ? { ...selectedCar } : undefined}
       />
+
+      {/* Success Popup */}
+      {successCar && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="w-8 h-8 text-green-600 stroke-3" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Car Registered!</h3>
+            <p className="text-gray-500 mb-6 text-sm">
+              {successCar.vehicleNo} has been checked in. Would you like to create a Job Card now?
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  router.push(`/dashboard/jobs?vehicle=${successCar.vehicleNo}&customer=${successCar.customer}`);
+                  setSuccessCar(null);
+                }}
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
+              >
+                <Briefcase className="w-5 h-5" />
+                Go to Job Card
+              </button>
+              <button
+                onClick={() => setSuccessCar(null)}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-lg transition-colors"
+              >
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

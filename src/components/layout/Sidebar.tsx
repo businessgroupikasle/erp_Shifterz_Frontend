@@ -128,11 +128,10 @@ export default function Sidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
-                      isActive
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${isActive
                         ? "bg-yellow-100 text-gray-900 border-l-4 border-yellow-400"
                         : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                      }`}
                   >
                     <Icon className="w-5 h-5 shrink-0" />
                     <span className="text-sm font-medium">{item.label}</span>

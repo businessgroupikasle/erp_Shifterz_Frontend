@@ -52,8 +52,8 @@ export default function PaymentsPage() {
 
   const filteredPayments = payments.filter((p) => {
     const matchesSearch = p.client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          p.invoiceId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          p.ref?.toLowerCase().includes(searchTerm.toLowerCase());
+      p.invoiceId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.ref?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDate = (!startDate || p.date >= startDate) && (!endDate || p.date <= endDate);
     return matchesSearch && matchesDate;
   });
@@ -144,13 +144,13 @@ export default function PaymentsPage() {
             Record Payment
           </button>
         </div>
-        
+
         <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex-1 relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search by client, invoice or ref..." 
+            <input
+              type="text"
+              placeholder="Search by client, invoice or ref..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b]"
@@ -158,8 +158,8 @@ export default function PaymentsPage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">From:</span>
-            <input 
-              type="date" 
+            <input
+              type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-gray-700 font-medium"
@@ -167,8 +167,8 @@ export default function PaymentsPage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">To:</span>
-            <input 
-              type="date" 
+            <input
+              type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f59e0b] text-gray-700 font-medium"

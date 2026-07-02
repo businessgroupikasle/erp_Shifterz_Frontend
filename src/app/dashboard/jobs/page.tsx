@@ -63,7 +63,7 @@ export default function JobCardsPage() {
     setIsDialogOpen(false);
     setSelectedJob(null);
   };
-  
+
   const stats = {
     pending: jobs.filter(j => j.status === "Pending").length,
     inProgress: jobs.filter(j => j.status === "In Progress").length,

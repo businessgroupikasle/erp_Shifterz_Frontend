@@ -96,23 +96,23 @@ export default function CustomersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Phone</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vehicle</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Car Model</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Visits</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total Spend</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Last Visit</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">ID</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Name</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Phone</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Email</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Vehicle</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Car Model</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Visits</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Total Spend</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Last Visit</th>
+                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {customers.map((customer) => (
                 <tr key={customer.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-xs font-mono text-gray-400">{customer.id}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-3 text-xs font-mono text-gray-400 whitespace-nowrap">{customer.id}</td>
+                  <td className="px-3 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
                         {customer.name.split(" ").map(n => n[0]).join("")}
@@ -120,20 +120,20 @@ export default function CustomersPage() {
                       <span className="font-semibold text-gray-900">{customer.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{customer.phone}</td>
-                  <td className="px-6 py-4 text-gray-600 text-xs">{customer.email}</td>
-                  <td className="px-6 py-4 text-gray-600 text-sm">{customer.vehicle}</td>
-                  <td className="px-6 py-4 text-gray-600">{customer.model}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded">
+                  <td className="px-3 py-3 text-gray-600 whitespace-nowrap text-xs">{customer.phone}</td>
+                  <td className="px-3 py-3 text-gray-600 text-xs whitespace-nowrap">{customer.email}</td>
+                  <td className="px-3 py-3 text-gray-600 text-xs font-medium whitespace-nowrap">{customer.vehicle}</td>
+                  <td className="px-3 py-3 text-gray-600 text-xs whitespace-nowrap">{customer.model}</td>
+                  <td className="px-3 py-3 text-center whitespace-nowrap">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-[10px] font-bold rounded">
                       {customer.visits}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-semibold text-yellow-600">
+                  <td className="px-3 py-3 font-semibold text-yellow-600 text-xs whitespace-nowrap">
                     ₹{customer.totalSpend.toLocaleString("en-IN")}
                   </td>
-                  <td className="px-6 py-4 text-gray-600 text-xs">{customer.lastVisit}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-3 text-gray-600 text-xs whitespace-nowrap">{customer.lastVisit}</td>
+                  <td className="px-3 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleViewBilling(customer.id, customer.name)}

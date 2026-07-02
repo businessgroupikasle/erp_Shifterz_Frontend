@@ -114,56 +114,56 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Dialog */}
-      <div className="relative bg-white rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl">
+      <div className="relative bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <ClipboardList className="w-6 h-6 text-[#f59e0b]" />
             {isEditing ? `Edit Job Card - ${formData.vehicle}` : "New Job Card"}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
           >
             <X className="w-5 h-5 text-gray-600" />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Vehicle No. *</label>
-              <input 
+              <input
                 required
-                type="text" 
+                type="text"
                 value={formData.vehicle}
-                onChange={e => setFormData({...formData, vehicle: formatVehicleNumber(e.target.value)})}
+                onChange={e => setFormData({ ...formData, vehicle: formatVehicleNumber(e.target.value) })}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors uppercase"
                 placeholder="TN 04 XX 0000"
               />
             </div>
-            
+
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Customer Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={formData.customer}
-                onChange={e => setFormData({...formData, customer: e.target.value})}
+                onChange={e => setFormData({ ...formData, customer: e.target.value })}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors"
                 placeholder="Full name"
               />
             </div>
-            
+
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Service</label>
-              <select 
+              <select
                 value={formData.service}
-                onChange={e => setFormData({...formData, service: e.target.value})}
+                onChange={e => setFormData({ ...formData, service: e.target.value })}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors"
               >
                 <option value="PPF Full Body">PPF Full Body</option>
@@ -171,7 +171,7 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData 
                 <option value="Interior Detailing">Interior Detailing</option>
               </select>
             </div>
-            
+
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Technician</label>
               <select
@@ -192,12 +192,12 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData 
                 ))}
               </select>
             </div>
-            
+
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Priority</label>
-              <select 
+              <select
                 value={formData.priority}
-                onChange={e => setFormData({...formData, priority: e.target.value})}
+                onChange={e => setFormData({ ...formData, priority: e.target.value })}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors"
               >
                 <option value="Normal">Normal</option>
@@ -205,12 +205,12 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData 
                 <option value="Low">Low</option>
               </select>
             </div>
-            
+
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Status</label>
-              <select 
+              <select
                 value={formData.status}
-                onChange={e => setFormData({...formData, status: e.target.value})}
+                onChange={e => setFormData({ ...formData, status: e.target.value })}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors"
               >
                 <option value="Pending">Pending</option>
@@ -219,38 +219,38 @@ export default function NewJobCardDialog({ isOpen, onClose, onSave, initialData 
                 <option value="Cancelled">Cancelled</option>
               </select>
             </div>
-            
+
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Start Date</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 value={formData.startDate}
-                onChange={e => setFormData({...formData, startDate: e.target.value})}
+                onChange={e => setFormData({ ...formData, startDate: e.target.value })}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors"
               />
             </div>
-            
+
             <div className="col-span-2 sm:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Est. Completion</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 value={formData.estCompletion}
-                onChange={e => setFormData({...formData, estCompletion: e.target.value})}
+                onChange={e => setFormData({ ...formData, estCompletion: e.target.value })}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors"
               />
             </div>
-            
+
             <div className="col-span-2 space-y-1.5">
               <label className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Notes</label>
-              <textarea 
+              <textarea
                 value={formData.notes}
-                onChange={e => setFormData({...formData, notes: e.target.value})}
+                onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-lg text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:bg-white transition-colors min-h-[80px]"
                 placeholder="Work stages, observations..."
               />
             </div>
           </div>
-          
+
           <button
             type="submit"
             className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"

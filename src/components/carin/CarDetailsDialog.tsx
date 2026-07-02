@@ -41,7 +41,7 @@ export default function CarDetailsDialog({ isOpen, onClose, carData }: CarDetail
       />
       
       {/* Dialog */}
-      <div className="relative bg-gray-50 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-gray-50 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         
         {/* Banner Header */}
         <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 text-white overflow-hidden">
@@ -50,7 +50,7 @@ export default function CarDetailsDialog({ isOpen, onClose, carData }: CarDetail
           
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-md"
+            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-md z-50 cursor-pointer"
           >
             <X className="w-5 h-5 text-white" />
           </button>

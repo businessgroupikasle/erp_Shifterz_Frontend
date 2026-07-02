@@ -87,7 +87,7 @@ const StatusDropdown = ({ lead, handleStatusChange }: { lead: Lead, handleStatus
         <span>{lead.status}</span>
         <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
-      
+
       {isOpen && (
         <div className="absolute z-50 mt-2 w-36 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] bg-white border border-gray-100 py-1.5 overflow-hidden -left-2 animate-in fade-in slide-in-from-top-2 duration-150">
           {statuses.map((status) => (
@@ -97,9 +97,8 @@ const StatusDropdown = ({ lead, handleStatusChange }: { lead: Lead, handleStatus
                 handleStatusChange(lead.id, status, lead);
                 setIsOpen(false);
               }}
-              className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-gray-50 transition-colors flex items-center gap-2.5 ${
-                status === lead.status ? "bg-gray-50 text-gray-900" : "text-gray-600"
-              }`}
+              className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-gray-50 transition-colors flex items-center gap-2.5 ${status === lead.status ? "bg-gray-50 text-gray-900" : "text-gray-600"
+                }`}
             >
               <span className={`w-2 h-2 rounded-full shadow-sm ${getDotColor(status)}`} />
               {status}
@@ -283,11 +282,10 @@ export default function LeadsPage() {
             <button
               key={tab}
               onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === tab
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === tab
                   ? "bg-gray-900 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+                }`}
             >
               {tab}
             </button>

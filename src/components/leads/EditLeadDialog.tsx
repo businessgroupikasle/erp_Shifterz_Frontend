@@ -112,8 +112,8 @@ export default function EditLeadDialog({
   if (!isOpen || !lead) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 w-full max-w-2xl shadow-xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <User className="w-6 h-6 text-yellow-500" />
@@ -129,7 +129,7 @@ export default function EditLeadDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Row 1: Name & Phone */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
                 Name <span className="text-red-500">*</span>
@@ -168,7 +168,7 @@ export default function EditLeadDialog({
           </div>
 
           {/* Row 2: Email & Vehicle No. */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
                 Email
@@ -198,7 +198,7 @@ export default function EditLeadDialog({
           </div>
 
           {/* Row 3: Source & Service */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
                 Source <span className="text-red-500">*</span>
@@ -242,7 +242,7 @@ export default function EditLeadDialog({
           </div>
 
           {/* Row 4: Assign To & Status */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
                 Assign To

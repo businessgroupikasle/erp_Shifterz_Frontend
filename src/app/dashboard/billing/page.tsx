@@ -77,9 +77,9 @@ export default function BillingPage() {
 
   const filteredDocs = documents.filter((doc) => {
     const matchesFilter = filter === "All" || doc.type === filter;
-    const matchesSearch = doc.client?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          doc.vehicle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          doc.id?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = doc.client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.vehicle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.id?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDate = (!startDate || doc.date >= startDate) && (!endDate || doc.date <= endDate);
     return matchesFilter && matchesSearch && matchesDate;
   });
@@ -297,11 +297,10 @@ export default function BillingPage() {
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
-                  filter === tab
+                className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${filter === tab
                     ? "bg-gray-900 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {tab}
               </button>
@@ -320,9 +319,9 @@ export default function BillingPage() {
         <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex-1 relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search by client, vehicle or doc no..." 
+            <input
+              type="text"
+              placeholder="Search by client, vehicle or doc no..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -330,8 +329,8 @@ export default function BillingPage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600">From:</span>
-            <input 
-              type="date" 
+            <input
+              type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -339,8 +338,8 @@ export default function BillingPage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600">To:</span>
-            <input 
-              type="date" 
+            <input
+              type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -373,106 +372,105 @@ export default function BillingPage() {
                 const remainingAmount = Math.max(0, totalAmount - paidAmount);
 
                 return (
-                <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-semibold text-yellow-600">{doc.id}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`inline-flex px-2.5 py-1 rounded text-xs font-semibold ${getTypeColor(doc.type)}`}>
-                      {doc.type}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <div className="font-semibold text-gray-900">{doc.client}</div>
-                    <div className="text-xs text-gray-500">{doc.phone}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                    ₹{totalAmount.toLocaleString("en-IN")}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-green-600">
-                    ₹{paidAmount.toLocaleString("en-IN")}
-                  </td>
-                  <td className="px-6 py-4 text-sm font-semibold">
-                    <span className={remainingAmount > 0 ? "text-red-600" : "text-green-600"}>
-                      ₹{remainingAmount.toLocaleString("en-IN")}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{doc.date}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`inline-flex px-2.5 py-1 rounded text-xs font-semibold ${getStatusColor(doc.status)}`}>
-                      {doc.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedDocument(doc);
-                          setIsPreviewOpen(true);
-                        }}
-                        className="p-1 hover:bg-gray-200 rounded transition-colors"
-                        title="View Invoice"
-                      >
-                        <Eye className="w-4 h-4 text-gray-600" />
-                      </button>
-                      <button
-                        onClick={() => handleMarkAsPaid(doc.id)}
-                        className={`p-1 rounded transition-colors ${
-                          doc.status === "Paid"
-                            ? "bg-green-100"
-                            : "hover:bg-gray-200"
-                        }`}
-                        title={doc.status === "Paid" ? "Paid" : "Mark as Paid"}
-                      >
-                        <Check className={`w-4 h-4 ${doc.status === "Paid" ? "text-green-600" : "text-gray-600"}`} />
-                      </button>
-                      {(doc.status === "Paid" || doc.status === "Partially Paid") && (
-                        <>
-                          <button
-                            onClick={() => {
-                              setDocumentForPaymentHistory(doc);
-                              setIsPaymentHistoryOpen(true);
-                            }}
-                            className="p-1 hover:bg-purple-100 rounded transition-colors"
-                            title="View Payment History"
-                          >
-                            <History className="w-4 h-4 text-purple-600" />
-                          </button>
-                          {doc.status === "Paid" && (
-                            <button
-                              onClick={() => {
-                                setSelectedPaymentDocument(doc);
-                                setIsPaymentReceiptOpen(true);
-                              }}
-                              className="p-1 hover:bg-blue-100 rounded transition-colors"
-                              title="View Payment Details"
-                            >
-                              <Receipt className="w-4 h-4 text-blue-600" />
-                            </button>
-                          )}
-                        </>
-                      )}
-                      {(doc.type === "Estimate" || doc.type === "Quotation") && doc.status !== "Paid" && doc.status !== "Converted" && (
+                  <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold text-yellow-600">{doc.id}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`inline-flex px-2.5 py-1 rounded text-xs font-semibold ${getTypeColor(doc.type)}`}>
+                        {doc.type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <div className="font-semibold text-gray-900">{doc.client}</div>
+                      <div className="text-xs text-gray-500">{doc.phone}</div>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                      ₹{totalAmount.toLocaleString("en-IN")}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-green-600">
+                      ₹{paidAmount.toLocaleString("en-IN")}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold">
+                      <span className={remainingAmount > 0 ? "text-red-600" : "text-green-600"}>
+                        ₹{remainingAmount.toLocaleString("en-IN")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{doc.date}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`inline-flex px-2.5 py-1 rounded text-xs font-semibold ${getStatusColor(doc.status)}`}>
+                        {doc.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
-                            setDocumentToConvert(doc);
-                            setIsConvertOpen(true);
+                            setSelectedDocument(doc);
+                            setIsPreviewOpen(true);
                           }}
-                          className="p-1 hover:bg-blue-100 rounded transition-colors"
-                          title={`Convert to ${doc.type === "Estimate" ? "Quotation" : "Invoice"}`}
+                          className="p-1 hover:bg-gray-200 rounded transition-colors"
+                          title="View Invoice"
                         >
-                          <ArrowRight className="w-4 h-4 text-blue-600" />
+                          <Eye className="w-4 h-4 text-gray-600" />
                         </button>
-                      )}
-                      <button
-                        onClick={() => handleDeleteDocument(doc.id)}
-                        className="p-1 hover:bg-red-100 rounded transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
+                        <button
+                          onClick={() => handleMarkAsPaid(doc.id)}
+                          className={`p-1 rounded transition-colors ${doc.status === "Paid"
+                              ? "bg-green-100"
+                              : "hover:bg-gray-200"
+                            }`}
+                          title={doc.status === "Paid" ? "Paid" : "Mark as Paid"}
+                        >
+                          <Check className={`w-4 h-4 ${doc.status === "Paid" ? "text-green-600" : "text-gray-600"}`} />
+                        </button>
+                        {(doc.status === "Paid" || doc.status === "Partially Paid") && (
+                          <>
+                            <button
+                              onClick={() => {
+                                setDocumentForPaymentHistory(doc);
+                                setIsPaymentHistoryOpen(true);
+                              }}
+                              className="p-1 hover:bg-purple-100 rounded transition-colors"
+                              title="View Payment History"
+                            >
+                              <History className="w-4 h-4 text-purple-600" />
+                            </button>
+                            {doc.status === "Paid" && (
+                              <button
+                                onClick={() => {
+                                  setSelectedPaymentDocument(doc);
+                                  setIsPaymentReceiptOpen(true);
+                                }}
+                                className="p-1 hover:bg-blue-100 rounded transition-colors"
+                                title="View Payment Details"
+                              >
+                                <Receipt className="w-4 h-4 text-blue-600" />
+                              </button>
+                            )}
+                          </>
+                        )}
+                        {(doc.type === "Estimate" || doc.type === "Quotation") && doc.status !== "Paid" && doc.status !== "Converted" && (
+                          <button
+                            onClick={() => {
+                              setDocumentToConvert(doc);
+                              setIsConvertOpen(true);
+                            }}
+                            className="p-1 hover:bg-blue-100 rounded transition-colors"
+                            title={`Convert to ${doc.type === "Estimate" ? "Quotation" : "Invoice"}`}
+                          >
+                            <ArrowRight className="w-4 h-4 text-blue-600" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteDocument(doc.id)}
+                          className="p-1 hover:bg-red-100 rounded transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
               })}
             </tbody>
           </table>

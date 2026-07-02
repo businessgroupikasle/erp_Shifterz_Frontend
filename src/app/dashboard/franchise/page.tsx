@@ -108,7 +108,7 @@ export default function FranchisePage() {
       </div>
 
       <div className="flex justify-end">
-        <button 
+        <button
           onClick={handleAdd}
           className="bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm"
         >
@@ -188,7 +188,7 @@ export default function FranchisePage() {
             })}
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="font-bold text-gray-900 mb-6 text-sm">Royalty Summary</h3>
           <div className="space-y-0">
@@ -209,11 +209,11 @@ export default function FranchisePage() {
         </div>
       </div>
 
-      <AddFranchiseDialog 
-        isOpen={isDialogOpen} 
-        onClose={() => setIsDialogOpen(false)} 
-        franchiseData={editingFranchise} 
-        onSave={handleSave} 
+      <AddFranchiseDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        franchiseData={editingFranchise}
+        onSave={handleSave}
       />
     </div>
   );

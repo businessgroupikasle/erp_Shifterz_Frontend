@@ -155,8 +155,8 @@ export default function PrintPassDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 w-full max-w-2xl shadow-xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">Out Pass Preview</h2>
           <div className="flex items-center gap-3">
@@ -197,7 +197,7 @@ export default function PrintPassDialog({
           </div>
 
           {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8">
             {/* Vehicle No. */}
             <div className="border-b border-gray-300 pb-4">
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
