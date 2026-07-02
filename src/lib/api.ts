@@ -200,6 +200,10 @@ export async function updateCarIn(id: string, carIn: any) {
   });
 }
 
+export async function deleteCarIn(id: string) {
+  return apiCall(`/carin/${id}`, { method: "DELETE" });
+}
+
 // ═══════════════════════════════════════════════════════════════
 // OUT PASS
 // ═══════════════════════════════════════════════════════════════

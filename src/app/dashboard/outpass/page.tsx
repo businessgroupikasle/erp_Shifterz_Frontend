@@ -142,7 +142,7 @@ export default function OutPassPage() {
               <tbody className="divide-y divide-gray-200">
                 {outPasses.map((pass) => (
                   <tr key={pass.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-3 py-3 text-xs font-semibold text-yellow-600">
+                    <td className="px-3 py-3 text-xs font-mono font-bold" style={{ color: "#F0B100" }}>
                       {pass.passId || pass.id}
                     </td>
                     <td className="px-3 py-3 text-xs font-bold text-gray-900 whitespace-nowrap">

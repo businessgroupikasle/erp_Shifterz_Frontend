@@ -12,6 +12,7 @@ export default function JobCardsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [priorityFilter, setPriorityFilter] = useState<string>("All");
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -86,99 +87,109 @@ export default function JobCardsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-col justify-between h-24">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white rounded-xl border border-gray-100 border-l-4 border-l-yellow-500 p-4 shadow-sm flex flex-col justify-between h-24">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pending</span>
           <span className="text-2xl font-bold text-gray-900">{stats.pending}</span>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-col justify-between h-24">
+        <div className="bg-white rounded-xl border border-gray-100 border-l-4 border-l-blue-500 p-4 shadow-sm flex flex-col justify-between h-24">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">In Progress</span>
           <span className="text-2xl font-bold text-gray-900">{stats.inProgress}</span>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-col justify-between h-24">
+        <div className="bg-white rounded-xl border border-gray-100 border-l-4 border-l-green-500 p-4 shadow-sm flex flex-col justify-between h-24">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Completed</span>
           <span className="text-2xl font-bold text-green-500">{stats.completed}</span>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-col justify-between h-24">
+        <div className="bg-white rounded-xl border border-gray-100 border-l-4 border-l-red-500 p-4 shadow-sm flex flex-col justify-between h-24">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cancelled</span>
           <span className="text-2xl font-bold text-red-500">{stats.cancelled}</span>
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <button
-          onClick={() => setIsDialogOpen(true)}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm"
-        >
-          <Plus className="w-4 h-4 stroke-3" /> New Job Card
-        </button>
+      {/* Priority Filter Buttons - outside the card section, below Cancelled */}
+      <div className="rounded-lg px-2 py-1.5 flex items-center gap-1 w-fit" style={{ backgroundColor: "#ebebebff" }}>
+        {["All", "Normal", "High", "Low"].map(level => (
+          <button
+            key={level}
+            onClick={() => setPriorityFilter(level)}
+            className={`text-sm px-3 py-1 rounded-md transition-colors ${
+              priorityFilter === level
+                ? 'bg-white text-gray-900 font-bold shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 font-medium'
+            }`}
+          >
+            {level}
+          </button>
+        ))}
       </div>
 
       {jobs.length === 0 ? (
         <div className="text-center py-12 text-gray-500">No jobs found</div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50/50 border-b border-gray-100 text-xs text-gray-400 uppercase font-bold tracking-wider">
-              <tr>
-                <th className="px-6 py-4">Job ID</th>
-                <th className="px-6 py-4">Vehicle</th>
-                <th className="px-6 py-4">Customer</th>
-                <th className="px-6 py-4">Service</th>
-                <th className="px-6 py-4">Technician</th>
-                <th className="px-6 py-4">Priority</th>
-                <th className="px-6 py-4">Start</th>
-                <th className="px-6 py-4">Est. Completion</th>
-                <th className="px-6 py-4">Actual</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Notes</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {jobs.map(j => (
-                <tr key={j.id} className="hover:bg-gray-50/50">
-                  <td className="px-6 py-4 font-mono text-xs text-yellow-500">{j.id}</td>
-                  <td className="px-6 py-4 font-bold text-gray-900">{j.vehicle}</td>
-                  <td className="px-6 py-4 text-gray-600">{j.customer}</td>
-                  <td className="px-6 py-4 text-gray-600">{j.service}</td>
-                  <td className="px-6 py-4 text-gray-600">{j.technician}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${j.priority === 'High' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
-                      {j.priority}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{j.startDate}</td>
-                  <td className="px-6 py-4 text-gray-600">{j.estCompletion}</td>
-                  <td className="px-6 py-4 text-gray-600">{j.actualCompletion}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${j.status === 'Completed' ? 'bg-green-50 text-green-600' : j.status === 'Pending' ? 'bg-gray-100 text-gray-600' : 'bg-blue-50 text-blue-600'}`}>
-                      {j.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500 text-xs max-w-[150px] truncate">{j.notes}</td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleEdit(j)}
-                        className="p-1.5 hover:bg-blue-50 rounded-md text-blue-500 transition-colors"
-                        title="Edit job"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(j.id)}
-                        className="p-1.5 hover:bg-red-50 rounded-md text-red-400 transition-colors"
-                        title="Delete job"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left min-w-[900px]">
+              <thead className="bg-gray-50/50 border-b border-gray-100 text-xs text-gray-400 uppercase font-bold tracking-wider">
+                <tr>
+                  <th className="px-4 py-4 whitespace-nowrap">Job ID</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Vehicle</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Customer</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Service</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Technician</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Priority</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Start</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Est. Completion</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Actual</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Status</th>
+                  <th className="px-4 py-4 whitespace-nowrap">Notes</th>
+                  <th className="px-4 py-4 text-right whitespace-nowrap">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {jobs.filter(j => priorityFilter === "All" || j.priority === priorityFilter).map(j => (
+                  <tr key={j.id} className="hover:bg-gray-50/50">
+                    <td className="px-6 py-4 font-mono text-xs font-bold whitespace-nowrap" style={{ color: "#F0B100" }}>{j.id}</td>
+                    <td className="px-4 py-4 font-bold text-gray-900 whitespace-nowrap">{j.vehicle}</td>
+                    <td className="px-4 py-4 text-gray-600 whitespace-nowrap">{j.customer}</td>
+                    <td className="px-4 py-4 text-gray-600">{j.service}</td>
+                    <td className="px-4 py-4 text-gray-600 whitespace-nowrap">{j.technician}</td>
+                    <td className="px-4 py-4">
+                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${j.priority === 'High' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                        {j.priority}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-gray-600 whitespace-nowrap">{j.startDate}</td>
+                    <td className="px-4 py-4 text-gray-600 whitespace-nowrap">{j.estCompletion}</td>
+                    <td className="px-4 py-4 text-gray-600 whitespace-nowrap">{j.actualCompletion}</td>
+                    <td className="px-4 py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap ${j.status === 'Completed' ? 'bg-green-50 text-green-600' : j.status === 'Pending' ? 'bg-gray-100 text-gray-600' : 'bg-blue-50 text-blue-600'}`}>
+                        {j.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-gray-500 text-xs max-w-[120px] truncate">{j.notes}</td>
+                    <td className="px-4 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(j)}
+                          className="p-1.5 hover:bg-blue-50 rounded-md text-blue-500 transition-colors"
+                          title="Edit job"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(j.id)}
+                          className="p-1.5 hover:bg-red-50 rounded-md text-red-400 transition-colors"
+                          title="Delete job"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

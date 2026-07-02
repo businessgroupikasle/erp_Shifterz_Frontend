@@ -373,7 +373,7 @@ export default function BillingPage() {
 
                 return (
                   <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-yellow-600">{doc.id}</td>
+                    <td className="px-6 py-4 text-xs font-mono font-bold" style={{ color: "#F0B100" }}>{doc.id}</td>
                     <td className="px-6 py-4 text-sm">
                       <span className={`inline-flex px-2.5 py-1 rounded text-xs font-semibold ${getTypeColor(doc.type)}`}>
                         {doc.type}

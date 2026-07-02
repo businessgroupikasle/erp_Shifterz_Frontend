@@ -111,7 +111,7 @@ export default function CustomersPage() {
             <tbody className="divide-y divide-gray-100">
               {customers.map((customer) => (
                 <tr key={customer.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-3 py-3 text-xs font-mono text-gray-400 whitespace-nowrap">{customer.id}</td>
+                  <td className="px-3 py-3 text-xs font-mono font-bold whitespace-nowrap" style={{ color: "#F0B100" }}>{customer.id}</td>
                   <td className="px-3 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-xs">

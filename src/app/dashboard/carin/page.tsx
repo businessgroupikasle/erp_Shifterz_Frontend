@@ -3,7 +3,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Circle, Edit, Download, Check, Briefcase } from "lucide-react";
+import { Plus, Eye, Circle, Edit, Download, Check, Briefcase, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import CarCheckInDialog from "@/components/carin/CarCheckInDialog";
 import PassCarDialog from "@/components/carin/PassCarDialog";
@@ -12,19 +12,22 @@ import CarDetailsDialog from "@/components/carin/CarDetailsDialog";
 interface CarEntry {
   id: string;
   entryId: string;
-  vehicleNo: string;
+  vehicleNo?: string;
+  vehicle?: string;
+  vehicleNumber?: string;
   model: string;
   customer: string;
   phone: string;
   service: string;
-  technician: string;
+  technician?: string;
+  technicianIn?: string;
   inTime: string;
   outTime: string | null;
   duration: string | null;
   status: string;
 }
 
-import { getCarInRecords, updateCarIn, createCarIn, editCarIn } from "@/lib/api";
+import { getCarInRecords, updateCarIn, createCarIn, editCarIn, deleteCarIn } from "@/lib/api";
 import { useEffect } from "react";
 import { calculateDuration, formatTime } from "@/lib/timeUtils";
 
@@ -78,6 +81,18 @@ export default function CarInOutPage() {
   const handleEditCar = (car: CarEntry) => {
     setSelectedCar(car);
     setIsDialogOpen(true);
+  };
+
+  const handleDeleteCar = async (car: CarEntry) => {
+    if (!confirm(`Are you sure you want to delete entry for ${car.vehicleNo || car.vehicle || "this car"}?`)) return;
+    try {
+      await deleteCarIn(car.id);
+      setCars(cars.filter(c => c.id !== car.id));
+      toast.success(`Car ${car.entryId || car.id} deleted successfully`);
+    } catch (err) {
+      console.error("Failed to delete car:", err);
+      toast.error("Failed to delete car entry. Please try again.");
+    }
   };
 
   const handlePassCar = (car: CarEntry) => {
@@ -168,12 +183,12 @@ export default function CarInOutPage() {
 
         const rows = dataToExport.map((car) => [
           car.entryId,
-          car.vehicleNo,
+          car.vehicleNo || car.vehicle || car.vehicleNumber || "",
           car.model,
           car.customer,
           car.phone,
           car.service,
-          car.technician,
+          car.technician || car.technicianIn || "",
           car.inTime,
           car.outTime || "-",
           car.duration || "-",
@@ -234,11 +249,11 @@ export default function CarInOutPage() {
               (car) => `
                   <tr>
                     <td>${car.entryId}</td>
-                    <td>${car.vehicleNo}</td>
+                    <td>${car.vehicleNo || car.vehicle || car.vehicleNumber || ""}</td>
                     <td>${car.model}</td>
                     <td>${car.customer}</td>
                     <td>${car.service}</td>
-                    <td>${car.technician}</td>
+                    <td>${car.technician || car.technicianIn || ""}</td>
                     <td>${car.inTime}</td>
                     <td>${car.status}</td>
                   </tr>
@@ -278,22 +293,25 @@ export default function CarInOutPage() {
   });
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       {/* Stats Bar */}
-      <div className="flex items-center gap-6 mb-6">
-        <div className="flex items-center gap-2">
-          <span className="text-green-600 font-semibold">● In Workshop: {inWorkshop}</span>
+      <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-6">
+        <div className="flex flex-wrap items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-green-600 font-semibold text-sm md:text-base">● In Workshop: {inWorkshop}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-blue-600 font-semibold text-sm md:text-base">Total Today: {totalToday}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-purple-600 font-semibold text-sm md:text-base">Delivered: {delivered}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-blue-600 font-semibold">Total Today: {totalToday}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-purple-600 font-semibold">Delivered: {delivered}</span>
-        </div>
-        <div className="ml-auto flex gap-3">
-          <div className="relative group">
+        
+        <div className="md:ml-auto flex flex-col sm:flex-row w-full md:w-auto gap-3">
+          <div className="relative group w-full sm:w-auto">
             <button
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
               <Download className="w-5 h-5" />
               Download
@@ -317,7 +335,7 @@ export default function CarInOutPage() {
           </div>
           <button
             onClick={() => { setSelectedCar(null); setIsDialogOpen(true); }}
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            className="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
           >
             <Plus className="w-5 h-5" />
             Car Check-In
@@ -326,12 +344,12 @@ export default function CarInOutPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="mb-6 flex gap-4 border-b border-gray-200">
+      <div className="mb-6 flex overflow-x-auto gap-2 sm:gap-4 border-b border-gray-200 scrollbar-hide">
         {["All", "In Workshop", "Delivered"].map((tab) => (
           <button
             key={tab}
             onClick={() => setFilter(tab)}
-            className={`px-4 py-3 font-medium transition-colors ${filter === tab
+            className={`px-3 sm:px-4 py-3 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${filter === tab
               ? "text-gray-900 border-b-2 border-gray-900"
               : "text-gray-600 hover:text-gray-900"
               }`}
@@ -385,11 +403,11 @@ export default function CarInOutPage() {
             <tbody className="divide-y divide-gray-200">
               {filteredCars.map((entry) => (
                 <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 text-xs font-mono font-bold" style={{ color: "#F0B100" }}>
                     {entry.entryId || entry.id}
                   </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                    {entry.vehicleNo}
+                  <td className="px-6 py-4 text-xs font-semibold text-gray-900 text-left whitespace-nowrap">
+                    {entry.vehicleNo || entry.vehicle || entry.vehicleNumber || ""}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{entry.model}</td>
                   <td className="px-6 py-4 text-sm">
@@ -397,9 +415,9 @@ export default function CarInOutPage() {
                     <div className="text-xs text-gray-500">{entry.phone}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{entry.service}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{entry.technician}</td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-700">{formatTime(entry.inTime)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
+                  <td className="px-6 py-4 text-sm text-gray-700">{entry.technician || entry.technicianIn || ""}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-700 whitespace-nowrap">{formatTime(entry.inTime)}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
                     {entry.outTime ? formatTime(entry.outTime) : "—"}
                   </td>
                   <td className="px-6 py-4 text-sm font-semibold text-green-600">
@@ -427,7 +445,7 @@ export default function CarInOutPage() {
                       ) : null}
                       <button
                         onClick={() => handleEditCar(entry)}
-                        className="p-1.5 hover:bg-gray-100 rounded transition-colors text-blue-600"
+                        className="p-1.5 hover:bg-blue-50 rounded transition-colors text-blue-500"
                         title="Edit details"
                       >
                         <Edit className="w-4 h-4" />
@@ -438,6 +456,13 @@ export default function CarInOutPage() {
                         title="View details"
                       >
                         <Eye className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCar(entry)}
+                        className="p-1.5 hover:bg-red-50 rounded transition-colors text-red-400"
+                        title="Delete entry"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>

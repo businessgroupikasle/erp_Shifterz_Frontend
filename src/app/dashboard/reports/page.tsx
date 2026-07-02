@@ -171,7 +171,7 @@ export default function ReportsPage() {
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-yellow-400 h-2 rounded-full"
-                      style={{ width: `${item.percentage * 3.33}%` }}
+                      style={{ width: `${item.percentage}%` }}
                     ></div>
                   </div>
                 </div>

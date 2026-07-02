@@ -52,7 +52,7 @@ const getSourceColor = (source: string) => {
   }
 };
 
-const StatusDropdown = ({ lead, handleStatusChange }: { lead: Lead, handleStatusChange: (id: string, newStatus: string, lead: Lead) => void }) => {
+const StatusDropdown = ({ lead, handleStatusChange, dropUp }: { lead: Lead, handleStatusChange: (id: string, newStatus: string, lead: Lead) => void, dropUp?: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -89,7 +89,8 @@ const StatusDropdown = ({ lead, handleStatusChange }: { lead: Lead, handleStatus
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-36 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] bg-white border border-gray-100 py-1.5 overflow-hidden -left-2 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className={`absolute z-50 w-36 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] bg-white border border-gray-100 py-1.5 overflow-hidden -left-2 animate-in fade-in duration-150 ${dropUp ? "bottom-full mb-2 slide-in-from-bottom-2" : "mt-2 slide-in-from-top-2"
+          }`}>
           {statuses.map((status) => (
             <button
               key={status}
@@ -283,8 +284,8 @@ export default function LeadsPage() {
               key={tab}
               onClick={() => setFilter(tab)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === tab
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-gray-900 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
             >
               {tab}
@@ -293,18 +294,22 @@ export default function LeadsPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <select
-            value={sourceFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400"
-          >
-            <option>All Sources</option>
-            <option>JustDial</option>
-            <option>Instagram</option>
-            <option>Referral</option>
-            <option>Facebook</option>
-            <option>Walk-in</option>
-          </select>
+          <div className="relative flex items-center">
+            <select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              className="appearance-none px-6 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center w-36"
+              style={{ textAlignLast: "center" }}
+            >
+              <option className="text-center" style={{ textAlign: "center" }}>All Sources</option>
+              <option className="text-center" style={{ textAlign: "center" }}>JustDial</option>
+              <option className="text-center" style={{ textAlign: "center" }}>Instagram</option>
+              <option className="text-center" style={{ textAlign: "center" }}>Referral</option>
+              <option className="text-center" style={{ textAlign: "center" }}>Facebook</option>
+              <option className="text-center" style={{ textAlign: "center" }}>Walk-in</option>
+            </select>
+            <ChevronDown className="absolute right-2.5 w-4 h-4 text-gray-500 pointer-events-none" />
+          </div>
 
           <button
             onClick={() => setIsDialogOpen(true)}
@@ -333,9 +338,9 @@ export default function LeadsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredLeads.map((lead) => (
+              {filteredLeads.map((lead, index) => (
                 <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-mono text-gray-400">{lead.id}</td>
+                  <td className="px-6 py-4 text-xs font-mono font-bold" style={{ color: "#F0B100" }}>{lead.id}</td>
                   <td className="px-6 py-4 text-sm">
                     <div className="font-semibold text-gray-900">{lead.name}</div>
                     <div className="text-xs text-gray-500">{lead.email}</div>
@@ -349,7 +354,7 @@ export default function LeadsPage() {
                   <td className="px-6 py-4 text-sm text-gray-700">{lead.service}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{lead.vehicle}</td>
                   <td className="px-6 py-4 text-sm">
-                    <StatusDropdown lead={lead} handleStatusChange={handleStatusChange} />
+                    <StatusDropdown lead={lead} handleStatusChange={handleStatusChange} dropUp={index >= filteredLeads.length - 2} />
                   </td>
                   <td className="px-6 py-4 text-sm flex items-center gap-2">
                     <button

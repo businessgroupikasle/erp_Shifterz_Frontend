@@ -141,7 +141,7 @@ export default function FranchisePage() {
             <tbody className="divide-y divide-gray-50">
               {franchises.map(f => (
                 <tr key={f.id} className="hover:bg-gray-50/50">
-                  <td className="px-6 py-4 font-mono text-xs text-gray-400">{f.id}</td>
+                  <td className="px-6 py-4 font-mono text-xs font-bold" style={{ color: "#F0B100" }}>{f.id}</td>
                   <td className="px-6 py-4 font-bold text-gray-900">{f.name}</td>
                   <td className="px-6 py-4 text-gray-600">{f.city}</td>
                   <td className="px-6 py-4 text-gray-600">{f.owner}</td>

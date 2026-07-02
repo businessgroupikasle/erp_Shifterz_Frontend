@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Car, Clock, Calendar, Plus } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { getServices, fetchVehicleDetails } from "@/lib/api";
+import { formatVehicleNumber, getVehicleType, normalizeVehicleNumber } from "@/utils/vehicleNumber";
 import AddTechnicianDialog from "./AddTechnicianDialog";
 
 interface CarCheckInDialogProps {
@@ -120,18 +121,7 @@ export default function CarCheckInDialog({
     fetchServices();
   }, []);
 
-  const formatVehicleNumber = (value: string) => {
-    const cleaned = value.replace(/\s/g, "").toUpperCase();
-    if (cleaned.length === 0) return "";
 
-    let formatted = "";
-    formatted += cleaned.substring(0, 2);
-    if (cleaned.length > 2) formatted += " " + cleaned.substring(2, 4);
-    if (cleaned.length > 4) formatted += " " + cleaned.substring(4, 6);
-    if (cleaned.length > 6) formatted += " " + cleaned.substring(6, 10);
-
-    return formatted;
-  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -149,9 +139,11 @@ export default function CarCheckInDialog({
   };
 
   const handleVehicleBlur = async () => {
-    if (formData.vehicleNumber.length > 4 && (!formData.customerName || !formData.phone)) {
+    // We can also normalize the vehicle number before passing it to the API
+    const normalized = normalizeVehicleNumber(formData.vehicleNumber);
+    if (normalized.length > 4 && (!formData.customerName || !formData.phone)) {
       try {
-        const details = await fetchVehicleDetails(formData.vehicleNumber);
+        const details = await fetchVehicleDetails(normalized);
         if (details && details.name) {
           setFormData((prev) => ({
             ...prev,
@@ -182,10 +174,10 @@ export default function CarCheckInDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate vehicle number format: TN 04 AB 1234
-    const vehicleRegex = /^[A-Z]{2}\s\d{2}\s[A-Z]{1,2}\s\d{1,4}$/;
-    if (!vehicleRegex.test(formData.vehicleNumber)) {
-      toast.error("Vehicle number format: TN 04 AB 1234 (State Code, RTO, Series, Number)");
+    // Validate vehicle number format using the new utility
+    const vehicleType = getVehicleType(formData.vehicleNumber);
+    if (vehicleType === "INVALID") {
+      toast.error("Invalid vehicle number format. Expected e.g. TN 04 AB 1234 or BH 12 AB 1234");
       return;
     }
 

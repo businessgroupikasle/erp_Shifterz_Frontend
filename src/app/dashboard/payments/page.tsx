@@ -196,8 +196,8 @@ export default function PaymentsPage() {
             <tbody className="divide-y divide-gray-100">
               {filteredPayments.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-gray-400 font-medium text-xs">{p.id}</td>
-                  <td className="px-6 py-4 text-[#eab308] font-semibold text-xs">{p.invoiceId || "-"}</td>
+                  <td className="px-6 py-4 font-mono font-bold text-xs" style={{ color: "#F0B100" }}>{p.id}</td>
+                  <td className="px-6 py-4 font-mono font-bold text-xs" style={{ color: "#F0B100" }}>{p.invoiceId || "-"}</td>
                   <td className="px-6 py-4 font-bold text-gray-900 text-sm">{p.client}</td>
                   <td className="px-6 py-4 font-bold text-[#22c55e]">{formatAmount(p.amount)}</td>
                   <td className="px-6 py-4">
